@@ -1084,11 +1084,12 @@ class Satellite(BaseSatellite):
             
             # Look if we are enabled or not. If ok, start the daemon mode
             self.look_for_early_exit()
+
+            self.load_modules_manager()
+
             self.do_daemon_init_and_start()
 
             self.do_post_daemon_init()
-
-            self.load_modules_manager()
 
             # We wait for initial conf
             self.wait_for_initial_conf()
