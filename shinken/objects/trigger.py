@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2012:
@@ -26,12 +25,13 @@
 import time
 import os
 import re
+import traceback
 
 from shinken.objects.item import Item, Items
 from shinken.misc.perfdata import PerfDatas
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.log import logger
-from shinken.trigger_functions import objs, trigger_functions
+from shinken.trigger_functions import objs, trigger_functions, set_value
 #objs = {'hosts': [], 'services': []}
 
 
@@ -69,7 +69,12 @@ class Trigger(Item):
             locals()[n] = f
 
         code = myself.code_bin  # Comment? => compile(myself.code_bin, "<irc>", "exec")
-        exec code in dict(locals())
+        try:
+            exec code in dict(locals())
+        except Exception as err:
+            set_value(self, "UNKNOWN: Trigger error: %s" % err, "", 3)
+            logger.error('%s Trigger %s failed: %s ; %s' % (self.host_name, myself.trigger_name, err, traceback.format_exc()))
+
 
     def __getstate__(self):
         return {'trigger_name': self.trigger_name, 'code_src': self.code_src, 'trigger_broker_raise_enabled': self.trigger_broker_raise_enabled}
