@@ -814,7 +814,7 @@ class Service(SchedulingItem):
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s: %s" % (self.get_name(), c.output))
+            logger.info("Stalking %s: %s" % (self.get_full_name(), c.output))
 
     # Give data for checks's macros
     def get_data_for_checks(self):
