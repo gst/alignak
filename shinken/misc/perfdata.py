@@ -40,7 +40,7 @@ def guess_int_or_float(val):
 
 
 # Class for one metric of a perf_data
-class Metric:
+class Metric(object):
     def __init__(self, s):
         self.name = self.value = self.uom = self.warning = self.critical = self.min = self.max = None
         s = s.strip()
@@ -62,6 +62,9 @@ class Metric:
             if self.uom == '%':
                 self.min = 0
                 self.max = 100
+
+    def __repr__(self):
+        return '<Metric %s=%s />' % (self.name, self.value)
 
     def __str__(self):
         s = "%s=%s%s" % (self.name, self.value, self.uom)
