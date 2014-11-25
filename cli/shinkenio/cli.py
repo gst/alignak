@@ -455,17 +455,22 @@ def install_package(pname, raw, update_only=False):
 
     logger.debug("TMPDIR:%s modules_dir:%s pname:%s", tmpdir, modules_dir, pname)
     # Now install the package from $TMP$/module/* to $MODULES$/pname/*
-    p_module = os.path.join(tmpdir, 'module')
+    p_module = os.path.join(tmpdir, pname)
+    if not os.path.exists(p_module):
+        # if the "mod-modname/modname" directory doesn't exist,
+        # then fallback on old hardcoded  name :
+        p_module = os.path.join(tmpdir, 'module')
+
     if os.path.exists(p_module):
         logger.info("Installing the module package data")
         mod_dest = os.path.join(modules_dir, pname)
         if os.path.exists(mod_dest):
             logger.info("Removing previous module install at %s", mod_dest)
-
             shutil.rmtree(mod_dest)
         # shutil will do the create dir
         shutil.copytree(p_module, mod_dest)
         logger.info("Copy done in the module directory %s", mod_dest)
+
 
 
     p_doc  = os.path.join(tmpdir, 'doc')
