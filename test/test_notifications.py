@@ -24,6 +24,8 @@
 #
 
 import time
+from shinken.objects.schedulingitem import SchedulingItem
+from shinken.objects.service import Service
 
 from shinken_test import unittest, ShinkenTest
 
@@ -140,6 +142,18 @@ class TestNotif(ShinkenTest):
         self.assertEqual(0, svc.current_notification_number)
 
     def test_continuous_notifications_delayed(self):
+
+        class NewService(Service):
+
+            @property
+            def current_notification_number(self):
+                return self._current_notification_number
+
+            @current_notification_number.setter
+            def current_notification_number(self, value):
+                self._current_notification_number = value
+
+
         self.print_header()
         # retry_interval 2
         # critical notification
@@ -149,6 +163,10 @@ class TestNotif(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+
+        value = svc.current_notification_number
+        svc.__class__ = NewService
+        svc.current_notification_number = value
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001  # and send imediatly then
@@ -189,6 +207,8 @@ class TestNotif(ShinkenTest):
         # there is 1 action which is the scheduled notification
         #-----------------------------------------------------------------
         loop = 0
+        print("BEFORE LOOP")
+        print(time.time(), deadline - time.time())
         while deadline > time.time():
             loop += 1
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -196,13 +216,15 @@ class TestNotif(ShinkenTest):
             self.show_actions()
             print deadline - time.time()
             ###self.assertEqual(1, self.count_actions())
+        print("%s loops done" % loop)
         #-----------------------------------------------------------------
         # now the delay period is over and the notification can be sent
         # with the next bad check
         # there is 1 action, the notification (
         # 1 notification was sent, so current_notification_number is 1
         #-----------------------------------------------------------------
-        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=1)
+        time.sleep(1)
+        self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0)
         print "Counted actions", self.count_actions()
         self.assertEqual(2, self.count_actions())
         # 1 master, 1 child
