@@ -25,6 +25,8 @@ import os
 import cmd
 import sys
 import time
+import logging
+
 
 try:
     from shinken.bin import VERSION
@@ -38,17 +40,27 @@ except ImportError:
 
 from shinken.bin import VERSION
 
-try:
-    import shinken.pyro_wrapper as pyro
-except ImportError:
-    sys.exit("Shinken require the Python Pyro module. Please install it.")
 from shinken.arbiterlink import ArbiterLink
-Pyro = pyro.Pyro
+
+if False:
+    try:
+        import shinken.pyro_wrapper as pyro
+    except ImportError:
+        sys.exit("Shinken require the Python Pyro module. Please install it.")
+    from shinken.arbiterlink import ArbiterLink
+    Pyro = pyro.Pyro
 
 
 class Dummy:
     def add(self, o):
         pass
+
+class AttributedDict(object):
+    def __init__(self, wrapped):
+        self._wrapped = wrapped
+    def __getattr__(self, item):
+        return self._wrapped[item]
+
 
 from shinken.log import logger
 logger.load_obj(Dummy())
@@ -64,7 +76,7 @@ def get_since(t):
     return "%ds ago" % (int(now - t))
 
 
-class ShinkenAdmin(cmd.Cmd):
+class ShinkenAdmin(cmd.Cmd, object):
     prompt = "> "
 
     def __init__(self):
@@ -76,6 +88,12 @@ class ShinkenAdmin(cmd.Cmd):
         if not self.arb:
             self.do_connect('')
         self.arb.ping()
+
+    def onecmd(self, line):
+        try:
+            return super(ShinkenAdmin, self).onecmd(line)
+        except Exception as err:
+            print('[%s] failed: %s' % (line, err))
 
     def emptyline(self):
         return
@@ -105,7 +123,7 @@ class ShinkenAdmin(cmd.Cmd):
         ArbiterLink.use_ssl = False
         self.arb = ArbiterLink({'arbiter_name': 'unnamed arbiter', 'address': addr, 'port': port})
         self.arb.fill_default()
-        self.arb.pythonize()
+        #self.arb.pythonize()
         self.arb.update_infos()
         if self.arb.reachable:
             print "Connection OK"
@@ -124,6 +142,13 @@ class ShinkenAdmin(cmd.Cmd):
             return
 
         data = self.arb.get_all_states()
+        new_data = {}
+        for k, v in data.items():
+            r = []
+            for i in v:
+                r.append(AttributedDict(i))
+            new_data[k] = r
+        data = new_data
 
         arbs = data['arbiter']
 
@@ -311,7 +336,7 @@ class ShinkenAdmin(cmd.Cmd):
 
         daemon = '*' if len(args) < 2 else args[0]
         try:
-            loglevel = logger.get_level_id(args[-1])
+            loglevel = logging.getLevelName(args[-1])
         except KeyError:
             print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]
             return
