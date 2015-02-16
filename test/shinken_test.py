@@ -107,7 +107,7 @@ def safe_print(*args, **kw):
     for coding in possible_codings:
         data = ' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
         try:
-            sys.stdout.write(data)
+            sys.stdout.write(data.decode(coding))
             break
         except UnicodeError as err:
             # there might still have some problem with the underlying sys.stdout.
@@ -118,7 +118,7 @@ def safe_print(*args, **kw):
                 raise
             sys.stderr.write('Error on write to sys.stdout with %s encoding: err=%s\nTrying with ascii' % (
                 coding, err))
-    sys.stdout.write(b'\n')
+    sys.stdout.write('\n')
 
 
 
