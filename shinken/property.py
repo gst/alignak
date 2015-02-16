@@ -228,7 +228,7 @@ class LogLevelProp(StringProp):
 
     def pythonize(self, val):
         val = unique_value(val)
-        return logging.getLevelName(val)
+        return logging._checkLevel(val)
 
 
 class DictProp(Property):
