@@ -87,7 +87,7 @@ class TestAction(ShinkenTest):
         a.env = {'TITI': 'est en vacance'}
         self.assertIn('TITI', a.get_local_environnement())
         self.assertEqual(a.get_local_environnement()['TITI'],
-                         'est en vacance' )
+                         b'est en vacance' )
         a.execute()
         self.wait_finished(a)
         self.assertEqual(a.output, 'est en vacance')
@@ -106,7 +106,7 @@ class TestAction(ShinkenTest):
         a.env = {'TITI': 'est en vacance'}
         self.assertIn('TITI', a.get_local_environnement())
         self.assertEqual(a.get_local_environnement()['TITI'],
-                         'est en vacance' )
+                         b'est en vacance' )
         a.execute()
         self.wait_finished(a)
         self.assertEqual(a.output, 'TITI=est en vacance')
@@ -137,7 +137,7 @@ class TestAction(ShinkenTest):
 
         self.assertIn('TITI', a.get_local_environnement())
         self.assertEqual(a.get_local_environnement()['TITI'],
-                         'est en vacance' )
+                         b'est en vacance' )
         a.execute()
 
         self.assertEqual('launched', a.status)
