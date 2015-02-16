@@ -55,7 +55,7 @@ def no_block_read(output):
     fl = fcntl.fcntl(fd, fcntl.F_GETFL)
     fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
     try:
-        return output.read()
+        return output.read().decode()
     except Exception:
         return ''
 
@@ -283,7 +283,7 @@ if os.name != 'nt':
                 cmd = self.command.encode('utf8', 'ignore')
             else:
                 try:
-                    cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+                    cmd = shlex.split(self.command)
                 except Exception as exp:
                     self.output = 'Not a valid shell command: ' + exp.__str__()
                     self.exit_status = 3
