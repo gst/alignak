@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -23,6 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import select
 import errno
 import time
@@ -37,6 +37,11 @@ try:
     import ssl
 except ImportError:
     ssl = None
+
+if sys.version_info < (3,):
+    import BaseHTTPServer
+else:
+    import http.server as BaseHTTPServer
 
 try:
     from cherrypy import wsgiserver as cheery_wsgiserver
@@ -209,7 +214,10 @@ class WSGIREFBackend(object):
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
         except select.error as e:
-            errnum, _ = e
+            if sys.version_info < (3,):
+                errnum, _ = e
+            else:
+                errnum = e.errno
             if errnum == errno.EINTR:
                 return []
             raise
@@ -291,7 +299,7 @@ class HTTPDaemon(object):
             logger.info("Opening HTTP socket at %s", self.uri)
 
             # Hack the BaseHTTPServer so only IP will be looked by wsgiref, and not names
-            __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = \
+            BaseHTTPServer.BaseHTTPRequestHandler.address_string = \
                 lambda x: x.client_address[0]
 
             if http_backend == 'cherrypy' or http_backend == 'auto' and cheery_wsgiserver:
