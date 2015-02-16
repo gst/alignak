@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import pickle
 import zlib
 import json
@@ -118,7 +119,11 @@ class HTTPClient(object):
         try:
             c.perform()
         except pycurl.error as error:
-            errno, errstr = error
+            if sys.version_info < (3,):
+                errno, errstr = error
+            else:
+                errno = error.args[0]
+                errstr = error.args[1]
             raise HTTPException('Connexion error to %s : %s' % (self.uri, errstr))
         r = c.getinfo(pycurl.HTTP_CODE)
         # Do NOT close the connexion, we want a keep alive
