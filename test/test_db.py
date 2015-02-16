@@ -23,7 +23,9 @@
 # This file is used to test reading and processing of config files
 #
 
-from shinken_test import *
+import sys
+
+from shinken_test import ShinkenTest, unittest
 from shinken.db import DB
 
 
@@ -37,7 +39,20 @@ class TestConfig(ShinkenTest):
         self.create_db()
         data = {'id': "1", "is_master": True, 'plop': "master of the universe"}
         q = self.db.create_insert_query('instances', data)
-        self.assertEqual("INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )", q)
+        if sys.version_info < (3,):
+            expected = "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )"
+            self.assertEqual(expected, q)
+        else:
+            expected = "zz" # "INSERT INTO test_instances  (plop , id , is_master  ) VALUES ('master of the universe' , '1' , '1'  )"
+            expected = ["INSERT INTO test_instances  (id , plop , is_master  ) VALUES ('1' , 'master of the universe' , '1'  )",
+                      "INSERT INTO test_instances  (id , is_master , plop  ) VALUES ('1' , '1' , 'master of the universe'  )",
+                      "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )",
+                      "INSERT INTO test_instances  (plop , id , is_master  ) VALUES ('master of the universe' , '1' , '1'  )",
+                      "INSERT INTO test_instances  (plop , is_master , id  ) VALUES ('master of the universe' , '1' , '1'  )",
+                      "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )",
+                      "INSERT INTO test_instances  (is_master , plop , id  ) VALUES ('1' , 'master of the universe' , '1'  )"]
+            self.assertIn(q, expected)
+
 
         # Now some UTF8 funny characters
         data = {'id': "1", "is_master": True, 'plop': '£°é§'}
@@ -46,8 +61,17 @@ class TestConfig(ShinkenTest):
         c = "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , '£°é§'  )"
         print(type(q), type(c))
         print(len(q), len(c))
-
-        self.assertEqual(c, q)
+        if sys.version_info < (3,):
+            self.assertEqual(c, q)
+        else:
+            self.assertIn(q,
+                          ["INSERT INTO test_instances  (id , plop , is_master  ) VALUES ('1' , '£°é§' , '1'  )",
+                           "INSERT INTO test_instances  (plop , is_master , id  ) VALUES ('£°é§' , '1' , '1'  )",
+                           "INSERT INTO test_instances  (is_master , plop , id  ) VALUES ('1' , '£°é§' , '1'  )",
+                           "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , '£°é§'  )",
+                           "INSERT INTO test_instances  (plop , id , is_master  ) VALUES ('£°é§' , '1' , '1'  )",
+                           "INSERT INTO test_instances  (id , is_master , plop  ) VALUES ('1' , '1' , '£°é§'  )"
+                           ])
 
     def test_update_query(self):
         self.create_db()
@@ -56,7 +80,12 @@ class TestConfig(ShinkenTest):
         q = self.db.create_update_query('instances', data, where)
         # beware of the last space
         print("Q", q)
-        self.assertEqual("UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' ", q)
+        if sys.version_info < (3,):
+            self.assertEqual("UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' ", q)
+        else:
+            self.assertIn(q,
+                          ["UPDATE test_instances set plop='master of the universe'  WHERE id='1' and is_master='1' ",
+                           "UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' "])
 
         # Now some UTF8 funny characters
         data = {'id': "1", "is_master": True, 'plop': '£°é§'}
@@ -64,7 +93,13 @@ class TestConfig(ShinkenTest):
         q = self.db.create_update_query('instances', data, where)
         #print "Q", q
         c = "UPDATE test_instances set plop='£°é§'  WHERE is_master='1' and id='£°é§'"
-        self.assertEqual(c.strip(), q.strip())
+        if sys.version_info < (3,):
+            self.assertEqual(c.strip(), q.strip())
+        else:
+            self.assertIn(q, [
+                "UPDATE test_instances set plop='£°é§'  WHERE id='£°é§' and is_master='1' ",
+                "UPDATE test_instances set plop='£°é§'  WHERE is_master='1' and id='£°é§' "
+            ])
 
 
 
