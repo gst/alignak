@@ -38,8 +38,8 @@ except:
     python_version = (1, 5)
 if python_version < (2, 6):
     sys.exit("Shinken require as a minimum Python 2.6.x, sorry")
-elif python_version >= (3,):
-    sys.exit("Shinken is not yet compatible with Python3k, sorry")
+#elif python_version >= (3,):
+#    sys.exit("Shinken is not yet compatible with Python3k, sorry")
 
 
 
