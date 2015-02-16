@@ -308,7 +308,7 @@ class DependencyNodeFactory(object):
             node.operand = 'of:'
             g = m.groups()
             # We can have a Aof: rule, or a multiple A,B,Cof: rule.
-            mul_of = (g[1] != u'' and g[2] != u'')
+            mul_of = (g[1] != '' and g[2] != '')
             # If multi got (A,B,C)
             if mul_of:
                 node.is_of_mul = True
@@ -340,7 +340,7 @@ class DependencyNodeFactory(object):
                 # that should not be good in fact !
                 if stacked_par == 1 and tmp != '':
                     # TODO : real error
-                    print "ERROR : bad expression near", tmp
+                    print("ERROR : bad expression near", tmp)
                     continue
 
                 # If we are already in a par, add this (
@@ -354,7 +354,7 @@ class DependencyNodeFactory(object):
 
                 if stacked_par < 0:
                     # TODO : real error
-                    print "Error : bad expression near", tmp, "too much ')'"
+                    print("Error : bad expression near", tmp, "too much ')'")
                     continue
 
                 if stacked_par == 0:
@@ -386,7 +386,7 @@ class DependencyNodeFactory(object):
             elif c == '!':
                 tmp = tmp.strip()
                 if tmp and tmp[0] != '!':
-                    print "Error : bad expression near", tmp, "wrong position for '!'"
+                    print("Error : bad expression near", tmp, "wrong position for '!'")
                     continue
                 # Flags next node not state
                 son_is_not = True
@@ -533,7 +533,7 @@ class DependencyNodeFactory(object):
                 host_expr = elts[0]
                 filters.extend(self.get_host_filters(host_expr))
                 items = hosts.find_by_filter(filters)
-        except re.error, e:
+        except re.error as e:
             error = "Business rule uses invalid regex %s: %s" % (pattern, e)
         else:
             if not items:

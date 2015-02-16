@@ -60,7 +60,7 @@ class LSSyncConnection:
             try:
                 self.socket.connect(target)
                 self.alive = True
-            except IOError, exp:
+            except IOError as exp:
                 self.alive = False
                 logger.warning("Connection problem: %s", str(exp))
 
@@ -106,7 +106,7 @@ class LSSyncConnection:
             else:
                 logger.warning("BAD RETURN CODE (code= %s, data=%s", code, data)
                 return None
-        except IOError, exp:
+        except IOError as exp:
             self.alive = False
             logger.warning("SOCKET ERROR (%s)", str(exp))
             return None
@@ -119,7 +119,7 @@ class LSSyncConnection:
 
         try:
             self.socket.send("COMMAND " + command + "\n")
-        except IOError, exp:
+        except IOError as exp:
             self.alive = False
             logger.warning("COMMAND EXEC error: %s", str(exp))
 
@@ -206,7 +206,7 @@ class LSAsynConnection(asyncore.dispatcher):
             try:
                 self.connect(target)
                 self.alive = True
-            except IOError, exp:
+            except IOError as exp:
                 self.alive = False
                 logger.warning("Connection problem: %s", str(exp))
                 self.handle_close()
@@ -232,7 +232,7 @@ class LSAsynConnection(asyncore.dispatcher):
 
         try:
             self.socket.send("COMMAND " + command + "\n")
-        except IOError, exp:
+        except IOError as exp:
             self.alive = False
             logger.warning("COMMAND EXEC error: %s", str(exp))
 
@@ -291,7 +291,7 @@ class LSAsynConnection(asyncore.dispatcher):
             else:
                 q.put(None)
                 return None
-        except IOError, exp:
+        except IOError as exp:
             self.alive = False
             logger.warning("SOCKET ERROR: %s", str(exp))
             return q.put(None)
@@ -323,7 +323,7 @@ class LSAsynConnection(asyncore.dispatcher):
         try:
             q = self.get_query()
             sent = self.send(q.get())
-        except socket.error, exp:
+        except socket.error as exp:
             logger.debug("Write fail: %s", str(exp))
             return
 

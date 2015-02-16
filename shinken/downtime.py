@@ -222,7 +222,7 @@ class Downtime:
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if hasattr(prop, 'fill_brok'):
                 if brok_type in entry['fill_brok']:
                     data[prop] = getattr(self, prop)

@@ -26,7 +26,7 @@ import os
 import time
 import sys
 import traceback
-import cStringIO
+import io
 import imp
 
 
@@ -36,6 +36,7 @@ from os import listdir
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 from shinken.misc import importlib
+import collections
 
 
 # We need to manage pre-2.0 module types with _ into the new 2.0 - mode
@@ -139,10 +140,10 @@ class ModulesManager(object):
                 inst.create_queues(self.manager)
 
             inst.init()
-        except Exception, e:
+        except Exception as e:
             logger.error("The instance %s raised an exception %s, I remove it!",
                          inst.get_name(), str(e))
-            output = cStringIO.StringIO()
+            output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this remove: %s", output.getvalue())
             output.close()
@@ -248,7 +249,7 @@ class ModulesManager(object):
                 queue_size = 0
                 try:
                     queue_size = inst.to_q.qsize()
-                except Exception, exp:
+                except Exception as exp:
                     pass
                 if queue_size > self.max_queue_size:
                     logger.error("The external module %s got a too high brok queue size (%s > %s)!",
@@ -304,7 +305,7 @@ class ModulesManager(object):
     def stop_all(self):
         # Ask internal to quit if they can
         for inst in self.get_internal_instances():
-            if hasattr(inst, 'quit') and callable(inst.quit):
+            if hasattr(inst, 'quit') and isinstance(inst.quit, collections.Callable):
                 inst.quit()
 
         self.clear_instances([inst for inst in self.instances if inst.is_external])

@@ -29,7 +29,7 @@
 
 import time
 
-from item import Item, Items
+from .item import Item, Items
 
 from shinken.property import StringProp, IntegerProp
 

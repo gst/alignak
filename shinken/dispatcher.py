@@ -72,7 +72,7 @@ class Dispatcher:
         self.elements = []  # all elements, sched and satellites
         self.satellites = []  # only satellites not schedulers
 
-        for cfg in self.conf.confs.values():
+        for cfg in list(self.conf.confs.values()):
             cfg.is_assigned = False
             cfg.assigned_to = None
             # We try to remember each "push", so we
@@ -342,7 +342,7 @@ class Dispatcher:
         # If no needed to dispatch, do not dispatch :)
         if not self.dispatch_ok:
             for r in self.realms:
-                conf_to_dispatch = [cfg for cfg in r.confs.values() if not cfg.is_assigned]
+                conf_to_dispatch = [cfg for cfg in list(r.confs.values()) if not cfg.is_assigned]
                 nb_conf = len(conf_to_dispatch)
                 if nb_conf > 0:
                     logger.info("Dispatching Realm %s", r.get_name())
@@ -455,7 +455,7 @@ class Dispatcher:
                         break
 
             # We pop conf to dispatch, so it must be no more conf...
-            conf_to_dispatch = [cfg for cfg in self.conf.confs.values() if not cfg.is_assigned]
+            conf_to_dispatch = [cfg for cfg in list(self.conf.confs.values()) if not cfg.is_assigned]
             nb_missed = len(conf_to_dispatch)
             if nb_missed > 0:
                 logger.warning("All schedulers configurations are not dispatched, %d are missing",
@@ -467,7 +467,7 @@ class Dispatcher:
             # Sched without conf in a dispatch ok are set to no need_conf
             # so they do not raise dispatch where no use
             if self.dispatch_ok:
-                for sched in self.schedulers.items.values():
+                for sched in list(self.schedulers.items.values()):
                     if sched.conf is None:
                         # print "Tagging sched", sched.get_name(),
                         # "so it do not ask anymore for conf"
@@ -479,7 +479,7 @@ class Dispatcher:
 
             # We put the satellites conf with the "new" way so they see only what we want
             for r in self.realms:
-                for cfg in r.confs.values():
+                for cfg in list(r.confs.values()):
                     cfg_id = cfg.id
                     # flavor if the push number of this configuration send to a scheduler
                     flavor = cfg.push_flavor

@@ -26,7 +26,7 @@ import os
 import signal
 import time
 import traceback
-import cPickle
+import pickle
 import zlib
 import base64
 
@@ -63,7 +63,7 @@ if not, they must drop their checks """
         # print "Sending %d checks" % len(res)
         self.app.nb_checks_send += len(res)
 
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
         # return zlib.compress(cPickle.dumps(res), 2)
     get_checks.encode = 'raw'
 
@@ -104,7 +104,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
         self.app.nb_broks_send += len(res)
         # we do not more have a full broks in queue
         self.app.brokers[bname]['has_full_broks'] = False
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
         # return zlib.compress(cPickle.dumps(res), 2)
     get_broks.encode = 'raw'
 
@@ -137,9 +137,9 @@ class IStats(Interface):
     def get_raw_stats(self):
         sched = self.app.sched
         res = {}
-        res['nb_scheduled'] = len([c for c in sched.checks.values() if c.status == 'scheduled'])
-        res['nb_inpoller'] = len([c for c in sched.checks.values() if c.status == 'inpoller'])
-        res['nb_zombies'] = len([c for c in sched.checks.values() if c.status == 'zombie'])
+        res['nb_scheduled'] = len([c for c in list(sched.checks.values()) if c.status == 'scheduled'])
+        res['nb_inpoller'] = len([c for c in list(sched.checks.values()) if c.status == 'inpoller'])
+        res['nb_zombies'] = len([c for c in list(sched.checks.values()) if c.status == 'zombie'])
         res['nb_notifications'] = len(sched.actions)
 
         # Spare scehdulers do not have such properties
@@ -270,7 +270,7 @@ class Shinken(BaseSatellite):
             s.compensate_system_time_change(difference)
 
         # Now all checks and actions
-        for c in self.sched.checks.values():
+        for c in list(self.sched.checks.values()):
             # Already launch checks should not be touch
             if c.status == 'scheduled' and c.t_to_go is not None:
                 t_to_go = c.t_to_go
@@ -292,7 +292,7 @@ class Shinken(BaseSatellite):
                     ref.next_chk = new_t
 
         # Now all checks and actions
-        for c in self.sched.actions.values():
+        for c in list(self.sched.actions.values()):
             # Already launch checks should not be touch
             if c.status == 'scheduled':
                 t_to_go = c.t_to_go
@@ -369,7 +369,7 @@ class Shinken(BaseSatellite):
                           statsd_prefix=statsd_prefix, statsd_enabled=statsd_enabled)
 
         t0 = time.time()
-        conf = cPickle.loads(conf_raw)
+        conf = pickle.loads(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs", t0, time.time() - t0)
         self.new_conf = None
 
@@ -530,6 +530,6 @@ class Shinken(BaseSatellite):
             self.uri = self.http_daemon.uri
             logger.info("[scheduler] General interface is at: %s", self.uri)
             self.do_mainloop()
-        except Exception, exp:
+        except Exception as exp:
             self.print_unrecoverable(traceback.format_exc())
             raise

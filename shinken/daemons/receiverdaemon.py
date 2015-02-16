@@ -29,10 +29,10 @@ import traceback
 import sys
 import base64
 import zlib
-import cPickle
+import pickle
 
 from multiprocessing import active_children
-from Queue import Empty
+from queue import Empty
 
 
 from shinken.satellite import Satellite
@@ -65,7 +65,7 @@ They connect here and get all broks (data for brokers). Data must be ORDERED!
     # A broker ask us broks
     def get_broks(self, bname):
         res = self.app.get_broks()
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
     get_broks.encode = 'raw'
 
 # Our main APP class
@@ -150,7 +150,7 @@ class Receiver(Satellite):
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
-            except Exception, exp:
+            except Exception as exp:
                 logger.warning("The mod %s raise an exception: %s, I kill it",
                                mod.get_name(), str(exp))
                 logger.warning("Exception type: %s", type(exp))
@@ -322,13 +322,13 @@ class Receiver(Satellite):
                     con.post('run_external_commands', {'cmds': cmds})
                     sent = True
                 # Not connected or sched is gone
-                except (HTTPExceptions, KeyError), exp:
+                except (HTTPExceptions, KeyError) as exp:
                     logger.debug('manage_returns exception:: %s,%s ', type(exp), str(exp))
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError, exp:  # the scheduler must  not be initialized
+                except AttributeError as exp:  # the scheduler must  not be initialized
                     logger.debug('manage_returns exception:: %s,%s ', type(exp), str(exp))
-                except Exception, exp:
+                except Exception as exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                     raise
 
@@ -420,7 +420,7 @@ class Receiver(Satellite):
             # Now the main loop
             self.do_mainloop()
 
-        except Exception, exp:
+        except Exception as exp:
             self.print_unrecoverable(traceback.format_exc())
             raise
 

@@ -31,12 +31,8 @@ from shinken.property import BoolProp, IntegerProp, StringProp, FloatProp
 from shinken.autoslots import AutoSlots
 
 
-class Notification(Action):
+class Notification(Action, metaclass=AutoSlots):
     """Please Add a Docstring to describe the class here"""
-
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
 
     my_type = 'notification'
 
@@ -194,7 +190,7 @@ class Notification(Action):
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if brok_type in entry.fill_brok:
                 data[prop] = getattr(self, prop)
 

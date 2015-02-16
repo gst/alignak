@@ -446,9 +446,9 @@ class ExternalCommandManager:
             if not os.path.exists(self.pipe_path):
                 os.umask(0)
                 try:
-                    os.mkfifo(self.pipe_path, 0660)
+                    os.mkfifo(self.pipe_path, 0o660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError, exp:
+                except OSError as exp:
                     self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
@@ -481,7 +481,7 @@ class ExternalCommandManager:
         # Maybe the command is invalid. Bailout
         try:
             command = excmd.cmd_line
-        except AttributeError, exp:
+        except AttributeError as exp:
             logger.debug("resolve_command:: error with command %s: %s", excmd, exp)
             return
 
@@ -506,7 +506,7 @@ class ExternalCommandManager:
                 args = r['args']
                 logger.debug("Got commands %s %s", c_name, str(args))
                 f = getattr(self, c_name)
-                apply(f, args)
+                f(*args)
             else:
                 command = r['cmd']
                 self.dispatch_global_command(command)
@@ -530,7 +530,7 @@ class ExternalCommandManager:
                 logger.info("Receiver pushing external command to scheduler %s", sched)
                 sched['external_commands'].append(extcmd)
         else:
-            for cfg in self.confs.values():
+            for cfg in list(self.confs.values()):
                 if cfg.hosts.find_by_name(host_name) is not None:
                     logger.debug("Host %s found in a configuration", host_name)
                     if cfg.is_assigned:
@@ -773,15 +773,15 @@ class ExternalCommandManager:
 
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODSATTR(self, contact, value):  # TODO
-        contact.modified_service_attributes = long(value)
+        contact.modified_service_attributes = int(value)
 
     # CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODHATTR(self, contact, value):  # TODO
-        contact.modified_host_attributes = long(value)
+        contact.modified_host_attributes = int(value)
 
     # CHANGE_CONTACT_MODATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODATTR(self, contact, value):
-        contact.modified_attributes = long(value)
+        contact.modified_attributes = int(value)
 
     # CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
@@ -877,7 +877,7 @@ class ExternalCommandManager:
 
     # CHANGE_HOST_MODATTR;<host_name>;<value>
     def CHANGE_HOST_MODATTR(self, host, value):
-        host.modified_attributes = long(value)
+        host.modified_attributes = int(value)
 
     # CHANGE_MAX_HOST_CHECK_ATTEMPTS;<host_name>;<check_attempts>
     def CHANGE_MAX_HOST_CHECK_ATTEMPTS(self, host, check_attempts):
@@ -953,7 +953,7 @@ class ExternalCommandManager:
         # This is not enough.
         # We need to also change each of the needed attributes.
         previous_value = service.modified_attributes
-        future_value = long(value)
+        future_value = int(value)
         changes = future_value ^ previous_value
 
         for modattr in [
@@ -2015,7 +2015,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(FIFO_PATH):
         os.umask(0)
-        os.mkfifo(FIFO_PATH, 0660)
+        os.mkfifo(FIFO_PATH, 0o660)
         my_fifo = open(FIFO_PATH, 'w+')
         logger.debug("my_fifo: %s", my_fifo)
 

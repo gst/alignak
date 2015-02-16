@@ -65,7 +65,7 @@ class SchedulerLink(SatelliteLink):
         logger.debug("[SchedulerLink] Sending %d commands", len(commands))
         try:
             self.con.post('run_external_commands', {'cmds': commands})
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             logger.debug(exp)
             return False
@@ -85,7 +85,7 @@ class SchedulerLink(SatelliteLink):
     def get_override_configuration(self):
         r = {}
         properties = self.__class__.properties
-        for prop, entry in properties.items():
+        for prop, entry in list(properties.items()):
             if entry.override:
                 r[prop] = getattr(self, prop)
         return r

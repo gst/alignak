@@ -53,7 +53,7 @@ class ArbiterLink(SatelliteLink):
         state = True
         cls = self.__class__
 
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if not hasattr(self, prop) and entry.required:
                 # This should raise an error afterwards?
                 # Log the issue
@@ -82,7 +82,7 @@ class ArbiterLink(SatelliteLink):
         try:
             self.con.get('do_not_run')
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -92,7 +92,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_list(daemon_type)
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return []
 
@@ -102,7 +102,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get_satellite_status(daemon_type, name)
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return {}
 
@@ -112,7 +112,7 @@ class ArbiterLink(SatelliteLink):
         try:
             r = self.con.get('get_all_states')
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return None
 
@@ -120,10 +120,10 @@ class ArbiterLink(SatelliteLink):
         if self.con is None:
             self.create_connection()
         try:
-            print properties
+            print(properties)
             r = self.con.get('get_objects_properties', {'table': table, 'properties': properties})
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return None
 

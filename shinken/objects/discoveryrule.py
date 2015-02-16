@@ -25,10 +25,10 @@
 
 from copy import copy
 
-from item import Item, Items
+from .item import Item, Items
 from shinken.objects.matchingitem import MatchingItem
-from service import Service
-from host import Host
+from .service import Service
+from .host import Host
 from shinken.property import StringProp, ListProp, IntegerProp
 
 
@@ -113,7 +113,7 @@ class Discoveryrule(MatchingItem):
         # Then running prop :)
         cls = self.__class__
         # adding running properties like latency, dependency list, etc
-        for prop, entry in cls.running_properties.items():
+        for prop, entry in list(cls.running_properties.items()):
             # Copy is slow, so we check type
             # Type with __iter__ are list or dict, or tuple.
             # Item need it's own list, so qe copy

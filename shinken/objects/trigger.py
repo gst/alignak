@@ -62,12 +62,12 @@ class Trigger(Item):
         self = ctx
 
         # Ok we can declare for this trigger call our functions
-        for (n, f) in trigger_functions.iteritems():
+        for (n, f) in trigger_functions.items():
             locals()[n] = f
 
         code = myself.code_bin  # Comment? => compile(myself.code_bin, "<irc>", "exec")
         try:
-            exec code in dict(locals())
+            exec(code, dict(locals()))
         except Exception as err:
             set_value(self, "UNKNOWN: Trigger error: %s" % err, "", 3)
             logger.error('%s Trigger %s failed: %s ; '
@@ -100,7 +100,7 @@ class Triggers(Items):
                         fd = open(p, 'rU')
                         buf = fd.read()
                         fd.close()
-                    except IOError, exp:
+                    except IOError as exp:
                         logger.error("Cannot open trigger file '%s' for reading: %s", p, exp)
                         # ok, skip this one
                         continue

@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
+from .item import Item, Items
 
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
@@ -179,7 +179,7 @@ class NotificationWay(Item):
                 is_null_notifway = True
                 return True
 
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.warning("[notificationway::%s] %s property not set",

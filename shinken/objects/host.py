@@ -31,8 +31,8 @@ scheduling/consume check smart things :)
 import time
 import itertools
 
-from item import Items
-from schedulingitem import SchedulingItem
+from .item import Items
+from .schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
 from shinken.util import (format_t_into_dhms_format, to_hostnames_list, get_obj_name,
@@ -45,11 +45,9 @@ from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
 
 
-class Host(SchedulingItem):
+class Host(SchedulingItem, metaclass=AutoSlots):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
-
     id = 1  # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'
@@ -264,7 +262,7 @@ class Host(SchedulingItem):
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'modified_attributes':
-            IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_chk':
             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':
@@ -664,7 +662,7 @@ class Host(SchedulingItem):
 
         special_properties = ['check_period', 'notification_interval', 'check_period',
                               'notification_period']
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("[host::%s] %s property not set", self.get_name(), prop)
@@ -1498,7 +1496,7 @@ class Hosts(Items):
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
 
-        for t in self.templates.itervalues():
+        for t in self.templates.values():
             # items::explode_contact_groups_into_contacts
             # take all contacts from our contact_groups into our contact property
             self.explode_contact_groups_into_contacts(t, contactgroups)
@@ -1528,7 +1526,7 @@ class Hosts(Items):
             # Ok also link checkmodulations
             for cw in h.checkmodulations:
                 cw.late_linkify_cw_by_commands(commands)
-                print cw
+                print(cw)
 
 
     # Create dependencies:

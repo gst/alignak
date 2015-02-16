@@ -34,18 +34,18 @@ class DB(object):
         # If raw string, go in unicode
         if isinstance(val, str):
             val = val.decode('utf8', 'ignore').replace("'", "''")
-        elif isinstance(val, unicode):
+        elif isinstance(val, str):
             val = val.replace("'", "''")
         else:  # other type, we can str
-            val = unicode(str(val))
+            val = str(str(val))
             val = val.replace("'", "''")
         return val
 
     def create_insert_query(self, table, data):
         """Create a INSERT query in table with all data of data (a dict)"""
-        query = u"INSERT INTO %s " % (self.table_prefix + table)
-        props_str = u' ('
-        values_str = u' ('
+        query = "INSERT INTO %s " % (self.table_prefix + table)
+        props_str = ' ('
+        values_str = ' ('
         i = 0  # f or the ',' problem... look like C here...
         for prop in data:
             i += 1
@@ -61,23 +61,23 @@ class DB(object):
             val = self.stringify(val)
 
             if i == 1:
-                props_str = props_str + u"%s " % prop
-                values_str = values_str + u"'%s' " % val
+                props_str = props_str + "%s " % prop
+                values_str = values_str + "'%s' " % val
             else:
-                props_str = props_str + u", %s " % prop
-                values_str = values_str + u", '%s' " % val
+                props_str = props_str + ", %s " % prop
+                values_str = values_str + ", '%s' " % val
 
         # Ok we've got data, let's finish the query
-        props_str = props_str + u' )'
-        values_str = values_str + u' )'
-        query = query + props_str + u' VALUES' + values_str
+        props_str = props_str + ' )'
+        values_str = values_str + ' )'
+        query = query + props_str + ' VALUES' + values_str
         return query
 
     def create_update_query(self, table, data, where_data):
         """Create a update query of table with data, and use where data for
         the WHERE clause
         """
-        query = u"UPDATE %s set " % (self.table_prefix + table)
+        query = "UPDATE %s set " % (self.table_prefix + table)
 
         # First data manage
         query_follow = ''
@@ -99,12 +99,12 @@ class DB(object):
                 val = self.stringify(val)
 
                 if i == 1:
-                    query_follow += u"%s='%s' " % (prop, val)
+                    query_follow += "%s='%s' " % (prop, val)
                 else:
-                    query_follow += u", %s='%s' " % (prop, val)
+                    query_follow += ", %s='%s' " % (prop, val)
 
         # Ok for data, now WHERE, same things
-        where_clause = u" WHERE "
+        where_clause = " WHERE "
         i = 0  # For the 'and' problem
         for prop in where_data:
             i += 1
@@ -120,9 +120,9 @@ class DB(object):
             val = self.stringify(val)
 
             if i == 1:
-                where_clause += u"%s='%s' " % (prop, val)
+                where_clause += "%s='%s' " % (prop, val)
             else:
-                where_clause += u"and %s='%s' " % (prop, val)
+                where_clause += "and %s='%s' " % (prop, val)
 
         query = query + query_follow + where_clause
         return query

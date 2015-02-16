@@ -30,7 +30,7 @@ import asyncore
 import getopt
 sys.path.append("..")
 sys.path.append("../..")
-from livestatus import LSAsynConnection, Query
+from .livestatus import LSAsynConnection, Query
 
 """ Benchmark of the livestatus broker"""
 
@@ -68,8 +68,8 @@ class FileQueryGenerator(SimpleQueryGenerator):
 
 
 def usage():
-    print " -n requests     Number of requests to perform [Default: 10]"
-    print " -c concurrency  Number of multiple requests to make [Default: 1]"
+    print(" -n requests     Number of requests to perform [Default: 10]")
+    print(" -c concurrency  Number of multiple requests to make [Default: 1]")
 
 
 def mean(numberList):
@@ -107,14 +107,14 @@ def run(url, requests, concurrency, qg):
     else:
         return
 
-    for x in xrange(0, concurrency):
+    for x in range(0, concurrency):
         conns.append(LSAsynConnection(addr=addr, port=port))
         (query_class, query_str) = qg.get()
         q = Query(query_str)
         q.query_class = query_class
         conns[x].stack_query(q)
 
-    print "Start queries"
+    print("Start queries")
     t = time.time()
     while remaining > 0:
         asyncore.poll(timeout=1)
@@ -131,7 +131,7 @@ def run(url, requests, concurrency, qg):
 
                 # Print a dot every 10 completed queries
                 if (remaining % 10 == 0):
-                    print '.',
+                    print('.', end=' ')
                     sys.stdout.flush()
 
                 # Run another query
@@ -140,17 +140,17 @@ def run(url, requests, concurrency, qg):
                 q.query_class = query_class
                 c.stack_query(q)
     running_time = time.time() - t
-    print "End queries"
+    print("End queries")
 
-    print "\n==============="
-    print "Execution report"
-    print "==============="
-    print "Running time is %04f s" % running_time
-    print "Query Class          nb  min      max       mean     median"
-    for query_class, durations in queries_durations.items():
-        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20), len(durations),
+    print("\n===============")
+    print("Execution report")
+    print("===============")
+    print("Running time is %04f s" % running_time)
+    print("Query Class          nb  min      max       mean     median")
+    for query_class, durations in list(queries_durations.items()):
+        print("%s %03d %03f %03f %03f %03f" % (query_class.ljust(20), len(durations),
                                                min(durations), max(durations), mean(durations),
-                                               median(durations))
+                                               median(durations)))
 
 
 def main(argv):
@@ -176,8 +176,8 @@ def main(argv):
     if len(args) >= 1:
         url = args[0]
 
-    print "Running %s queries on %s" % (requests, url)
-    print "Concurrency level %s " % (concurrency)
+    print("Running %s queries on %s" % (requests, url))
+    print("Concurrency level %s " % (concurrency))
 
     qg = FileQueryGenerator("thruk_tac.queries")
 

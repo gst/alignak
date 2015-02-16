@@ -25,13 +25,13 @@
 
 import time
 import os
-import cStringIO
+import io
 import tempfile
 import traceback
-import cPickle
+import pickle
 
 import threading
-from Queue import Empty
+from queue import Empty
 
 from shinken.external_command import ExternalCommand
 from shinken.check import Check
@@ -235,20 +235,20 @@ class Scheduler(object):
         try:
             f = open(p, 'w')
             f.write('Scheduler DUMP at %d\n' % time.time())
-            for c in self.checks.values():
+            for c in list(self.checks.values()):
                 s = 'CHECK: %s:%s:%s:%s:%s:%s\n' % \
                     (c.id, c.status, c.t_to_go, c.poller_tag, c.command, c.worker)
                 f.write(s)
-            for a in self.actions.values():
+            for a in list(self.actions.values()):
                 s = '%s: %s:%s:%s:%s:%s:%s\n' % \
                     (a.__class__.my_type.upper(), a.id, a.status,
                      a.t_to_go, a.reactionner_tag, a.command, a.worker)
                 f.write(s)
-            for b in self.broks.values():
+            for b in list(self.broks.values()):
                 s = 'BROK: %s:%s\n' % (b.id, b.type)
                 f.write(s)
             f.close()
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
 
@@ -261,7 +261,7 @@ class Scheduler(object):
             f.write('Scheduler config DUMP at %d\n' % time.time())
             self.conf.dump(f)
             f.close()
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Error in writing the dump file %s : %s", p, str(exp))
 
     # Load the external command
@@ -386,11 +386,11 @@ class Scheduler(object):
                 f = getattr(inst, full_hook_name)
                 try:
                     f(self)
-                except Exception, exp:
+                except Exception as exp:
                     logger.error("The instance %s raise an exception %s."
                                  "I disable it and set it to restart it later",
                                  inst.get_name(), str(exp))
-                    output = cStringIO.StringIO()
+                    output = io.StringIO()
                     traceback.print_exc(file=output)
                     logger.error("Exception trace follows: %s", output.getvalue())
                     output.close()
@@ -416,7 +416,7 @@ class Scheduler(object):
         if len(self.checks) > max_checks:
             # keys does not ensure sorted keys. Max is slow but we have no other way.
             id_max = max(self.checks.keys())
-            to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
+            to_del_checks = [c for c in list(self.checks.values()) if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
             if nb_checks_drops > 0:
                 logger.info("I have to del some checks (%d)..., sorry", nb_checks_drops)
@@ -438,7 +438,7 @@ class Scheduler(object):
         # For broks and actions, it's more simple
         # or brosk, manage global but also all brokers queue
         b_lists = [self.broks]
-        for (bname, e) in self.brokers.iteritems():
+        for (bname, e) in self.brokers.items():
             b_lists.append(e['broks'])
         for broks in b_lists:
             if len(broks) > max_broks:
@@ -551,7 +551,7 @@ class Scheduler(object):
     # we take the sons and we put them into our actions queue
     def scatter_master_notifications(self):
         now = time.time()
-        for a in self.actions.values():
+        for a in list(self.actions.values()):
             # We only want notifications
             if a.is_a != 'notification':
                 continue
@@ -618,7 +618,7 @@ class Scheduler(object):
 
         # If poller want to do checks
         if do_checks:
-            for c in self.checks.values():
+            for c in list(self.checks.values()):
                 #  If the command is untagged, and the poller too, or if both are tagged
                 #  with same name, go for it
                 # if do_check, call for poller, and so poller_tags by default is ['None']
@@ -637,7 +637,7 @@ class Scheduler(object):
 
         # If reactionner want to notify too
         if do_actions:
-            for a in self.actions.values():
+            for a in list(self.actions.values()):
                 is_master = (a.is_a == 'notification' and not a.contact)
 
                 if not is_master:
@@ -700,10 +700,10 @@ class Scheduler(object):
                     logger.warning("The notification command '%s' raised an error "
                                    "(exit code=%d): '%s'", c.command, c.exit_status, c.output)
 
-            except KeyError, exp:  # bad number for notif, not that bad
+            except KeyError as exp:  # bad number for notif, not that bad
                 logger.warning('put_results:: get unknown notification : %s ', str(exp))
 
-            except AttributeError, exp:  # bad object, drop it
+            except AttributeError as exp:  # bad object, drop it
                 logger.warning('put_results:: get bad notification : %s ', str(exp))
         elif c.is_a == 'check':
             try:
@@ -714,7 +714,7 @@ class Scheduler(object):
                     c.exit_status = self.conf.timeout_exit_status
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
-            except KeyError, exp:
+            except KeyError as exp:
                 pass
 
 
@@ -788,7 +788,7 @@ class Scheduler(object):
         try:
             links[id]['con'] = HTTPClient(uri=uri, strong_ssl=links[id]['hard_ssl_name_check'])
             con = links[id]['con']
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
@@ -796,11 +796,11 @@ class Scheduler(object):
         try:
             # initial ping must be quick
             con.get('ping')
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("Connection problem to the %s %s: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
-        except KeyError, exp:
+        except KeyError as exp:
             logger.warning("The %s '%s' is not initialized: %s", type, links[id]['name'], str(exp))
             links[id]['con'] = None
             return
@@ -811,7 +811,7 @@ class Scheduler(object):
     # We should push actions to our passives satellites
     def push_actions_to_passives_satellites(self):
         # We loop for our passive pollers or reactionners
-        for p in filter(lambda p: p['passive'], self.pollers.values()):
+        for p in [p for p in list(self.pollers.values()) if p['passive']]:
             logger.debug("I will send actions to the poller %s", str(p))
             con = p['con']
             poller_tags = p['poller_tags']
@@ -823,11 +823,11 @@ class Scheduler(object):
                     logger.debug("Sending %s actions", len(lst))
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -836,7 +836,7 @@ class Scheduler(object):
 
         # TODO:factorize
         # We loop for our passive reactionners
-        for p in filter(lambda p: p['passive'], self.reactionners.values()):
+        for p in [p for p in list(self.reactionners.values()) if p['passive']]:
             logger.debug("I will send actions to the reactionner %s", str(p))
             con = p['con']
             reactionner_tags = p['reactionner_tags']
@@ -850,11 +850,11 @@ class Scheduler(object):
                     logger.debug("Sending %d actions", len(lst))
                     con.post('push_actions', {'actions': lst, 'sched_id': self.instance_id})
                     self.nb_checks_send += len(lst)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -865,7 +865,7 @@ class Scheduler(object):
     # We should get returns from satellites
     def get_actions_from_passives_satellites(self):
         # We loop for our passive pollers
-        for p in [p for p in self.pollers.values() if p['passive']]:
+        for p in [p for p in list(self.pollers.values()) if p['passive']]:
             logger.debug("I will get actions from the poller %s", str(p))
             con = p['con']
             poller_tags = p['poller_tags']
@@ -884,8 +884,8 @@ class Scheduler(object):
 
                     # now go the cpickle pass, and catch possible errors from it
                     try:
-                        results = cPickle.loads(results)
-                    except Exception, exp:
+                        results = pickle.loads(results)
+                    except Exception as exp:
                         logger.error('Cannot load passive results from satellite %s : %s',
                                      p['name'], str(exp))
                         continue
@@ -897,11 +897,11 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     continue
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     continue
@@ -909,7 +909,7 @@ class Scheduler(object):
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # We loop for our passive reactionners
-        for p in [p for p in self.reactionners.values() if p['passive']]:
+        for p in [p for p in list(self.reactionners.values()) if p['passive']]:
             logger.debug("I will get actions from the reactionner %s", str(p))
             con = p['con']
             reactionner_tags = p['reactionner_tags']
@@ -919,7 +919,7 @@ class Scheduler(object):
                     # Before ask a call that can be long, do a simple ping to be sure it is alive
                     con.get('ping')
                     results = con.get('get_returns', {'sched_id': self.instance_id}, wait='long')
-                    results = cPickle.loads(str(results))
+                    results = pickle.loads(str(results))
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results", nb_received)
@@ -927,11 +927,11 @@ class Scheduler(object):
                         result.set_type_passive()
                     with self.waiting_results_lock:
                         self.waiting_results.extend(results)
-                except HTTPExceptions, exp:
+                except HTTPExceptions as exp:
                     logger.warning("Connection problem to the %s %s: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
-                except KeyError, exp:
+                except KeyError as exp:
                     logger.warning("The %s '%s' is not initialized: %s", type, p['name'], str(exp))
                     p['con'] = None
                     return
@@ -943,7 +943,7 @@ class Scheduler(object):
     # simply ask their ref to manage it when it's ok to run
     def manage_internal_checks(self):
         now = time.time()
-        for c in self.checks.values():
+        for c in list(self.checks.values()):
             # must be ok to launch, and not an internal one (business rules based)
             if c.internal and c.status == 'scheduled' and c.is_launchable(now):
                 c.ref.manage_internal_check(self.hosts, self.services, c)
@@ -1006,7 +1006,7 @@ class Scheduler(object):
         for h in self.hosts:
             d = {}
             running_properties = h.__class__.running_properties
-            for prop, entry in running_properties.items():
+            for prop, entry in list(running_properties.items()):
                 if entry.retention:
                     v = getattr(h, prop)
                     # Maybe we should "prepare" the data before saving it
@@ -1018,7 +1018,7 @@ class Scheduler(object):
             # and some properties are also like this, like
             # active checks enabled or not
             properties = h.__class__.properties
-            for prop, entry in properties.items():
+            for prop, entry in list(properties.items()):
                 if entry.retention:
                     v = getattr(h, prop)
                     # Maybe we should "prepare" the data before saving it
@@ -1033,7 +1033,7 @@ class Scheduler(object):
         for s in self.services:
             d = {}
             running_properties = s.__class__.running_properties
-            for prop, entry in running_properties.items():
+            for prop, entry in list(running_properties.items()):
                 if entry.retention:
                     v = getattr(s, prop)
                     # Maybe we should "prepare" the data before saving it
@@ -1049,7 +1049,7 @@ class Scheduler(object):
                 # Same for properties, like active checks enabled or not
                 properties = s.__class__.properties
 
-                for prop, entry in properties.items():
+                for prop, entry in list(properties.items()):
                     # We save the value only if the attribute
                     # is selected for retention AND has been modified.
                     if entry.retention and \
@@ -1082,7 +1082,7 @@ class Scheduler(object):
             if h is not None:
                 # First manage all running properties
                 running_properties = h.__class__.running_properties
-                for prop, entry in running_properties.items():
+                for prop, entry in list(running_properties.items()):
                     if entry.retention:
                         # Maybe the saved one was not with this value, so
                         # we just bypass this
@@ -1091,14 +1091,14 @@ class Scheduler(object):
                 # Ok, some are in properties too (like active check enabled
                 # or not. Will OVERRIDE THE CONFIGURATION VALUE!
                 properties = h.__class__.properties
-                for prop, entry in properties.items():
+                for prop, entry in list(properties.items()):
                     if entry.retention:
                         # Maybe the saved one was not with this value, so
                         # we just bypass this
                         if prop in d:
                             setattr(h, prop, d[prop])
                 # Now manage all linked objects load from previous run
-                for a in h.notifications_in_progress.values():
+                for a in list(h.notifications_in_progress.values()):
                     a.ref = h
                     self.add(a)
                     # Also raises the action id, so do not overlap ids
@@ -1146,7 +1146,7 @@ class Scheduler(object):
             if s is not None:
                 # Load the major values from running properties
                 running_properties = s.__class__.running_properties
-                for prop, entry in running_properties.items():
+                for prop, entry in list(running_properties.items()):
                     if entry.retention:
                         # Maybe the saved one was not with this value, so
                         # we just bypass this
@@ -1154,14 +1154,14 @@ class Scheduler(object):
                             setattr(s, prop, d[prop])
                 # And some others from properties dict too
                 properties = s.__class__.properties
-                for prop, entry in properties.items():
+                for prop, entry in list(properties.items()):
                     if entry.retention:
                         # Maybe the saved one was not with this value, so
                         # we just bypass this
                         if prop in d:
                             setattr(s, prop, d[prop])
                 # Ok now manage all linked objects
-                for a in s.notifications_in_progress.values():
+                for a in list(s.notifications_in_progress.values()):
                     a.ref = s
                     self.add(a)
                     # Also raises the action id, so do not overlap id
@@ -1310,14 +1310,14 @@ class Scheduler(object):
 
         # Then we consume them
         # print "**********Consume*********"
-        for c in self.checks.values():
+        for c in list(self.checks.values()):
             if c.status == 'waitconsume':
                 item = c.ref
                 item.consume_result(c)
 
 
         # All 'finished' checks (no more dep) raise checks they depends on
-        for c in self.checks.values():
+        for c in list(self.checks.values()):
             if c.status == 'havetoresolvedep':
                 for dependent_checks in c.depend_on_me:
                     # Ok, now dependent will no more wait c
@@ -1326,7 +1326,7 @@ class Scheduler(object):
                 c.status = 'zombie'
 
         # Now, reinteger dep checks
-        for c in self.checks.values():
+        for c in list(self.checks.values()):
             if c.status == 'waitdep' and len(c.depend_on) == 0:
                 item = c.ref
                 item.consume_result(c)
@@ -1337,7 +1337,7 @@ class Scheduler(object):
     def delete_zombie_checks(self):
         # print "**********Delete zombies checks****"
         id_to_del = []
-        for c in self.checks.values():
+        for c in list(self.checks.values()):
             if c.status == 'zombie':
                 id_to_del.append(c.id)
         # une petite tape dans le dos et tu t'en vas, merci...
@@ -1351,7 +1351,7 @@ class Scheduler(object):
     def delete_zombie_actions(self):
         # print "**********Delete zombies actions****"
         id_to_del = []
-        for a in self.actions.values():
+        for a in list(self.actions.values()):
             if a.status == 'zombie':
                 id_to_del.append(a.id)
         # une petite tape dans le dos et tu t'en vas, merci...
@@ -1400,14 +1400,14 @@ class Scheduler(object):
 
         # A loop where those downtimes are removed
         # which were marked for deletion (mostly by dt.exit())
-        for dt in self.downtimes.values():
+        for dt in list(self.downtimes.values()):
             if dt.can_be_deleted is True:
                 ref = dt.ref
                 self.del_downtime(dt.id)
                 broks.append(ref.get_update_status_brok())
 
         # Same for contact downtimes:
-        for dt in self.contact_downtimes.values():
+        for dt in list(self.contact_downtimes.values()):
             if dt.can_be_deleted is True:
                 ref = dt.ref
                 self.del_contact_downtime(dt.id)
@@ -1415,14 +1415,14 @@ class Scheduler(object):
 
         # Downtimes are usually accompanied by a comment.
         # An exiting downtime also invalidates it's comment.
-        for c in self.comments.values():
+        for c in list(self.comments.values()):
             if c.can_be_deleted is True:
                 ref = c.ref
                 self.del_comment(c.id)
                 broks.append(ref.get_update_status_brok())
 
         # Check start and stop times
-        for dt in self.downtimes.values():
+        for dt in list(self.downtimes.values()):
             if dt.real_end_time < now:
                 # this one has expired
                 broks.extend(dt.exit())  # returns downtimestop notifications
@@ -1482,7 +1482,7 @@ class Scheduler(object):
     def check_orphaned(self):
         worker_names = {}
         now = int(time.time())
-        for c in self.checks.values():
+        for c in list(self.checks.values()):
             time_to_orphanage = c.ref.get_time_to_orphanage()
             if time_to_orphanage:
                 if c.status == 'inpoller' and c.t_to_go < now - time_to_orphanage:
@@ -1491,7 +1491,7 @@ class Scheduler(object):
                         worker_names[c.worker] = 1
                         continue
                     worker_names[c.worker] += 1
-        for a in self.actions.values():
+        for a in list(self.actions.values()):
             time_to_orphanage = a.ref.get_time_to_orphanage()
             if time_to_orphanage:
                 if a.status == 'inpoller' and a.t_to_go < now - time_to_orphanage:
@@ -1513,13 +1513,13 @@ class Scheduler(object):
         for mod in self.sched_daemon.modules_manager.get_external_instances():
             logger.debug("Look for sending to module %s", mod.get_name())
             q = mod.to_q
-            to_send = [b for b in self.broks.values()
+            to_send = [b for b in list(self.broks.values())
                        if not getattr(b, 'sent_to_sched_externals', False) and mod.want_brok(b)]
             q.put(to_send)
             nb_sent += len(to_send)
 
         # No more need to send them
-        for b in self.broks.values():
+        for b in list(self.broks.values()):
             b.sent_to_sched_externals = True
         logger.debug("Time to send %s broks (after %d secs)", nb_sent, time.time() - t0)
 
@@ -1560,13 +1560,13 @@ class Scheduler(object):
         metrics = res['metrics']
         metrics.append('scheduler.%s.checks.scheduled %d %d' %
                        (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
+                        len([c for c in list(self.checks.values()) if c.status == 'scheduled']), now))
         metrics.append('scheduler.%s.checks.inpoller %d %d' %
                        (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
+                        len([c for c in list(self.checks.values()) if c.status == 'scheduled']), now))
         metrics.append('scheduler.%s.checks.zombie %d %d' %
                        (self.instance_name,
-                        len([c for c in self.checks.values() if c.status == 'scheduled']), now))
+                        len([c for c in list(self.checks.values()) if c.status == 'scheduled']), now))
         metrics.append('scheduler.%s.actions.queue %d %d' %
                        (self.instance_name,
                         len(self.actions), now))
@@ -1599,7 +1599,7 @@ class Scheduler(object):
             all_commands[cmd] = (old_u_time, old_s_time)
         # now sort it
         p = []
-        for (c, e) in all_commands.iteritems():
+        for (c, e) in all_commands.items():
             u_time, s_time = e
             p.append({'cmd': c, 'u_time': u_time, 's_time': s_time})
         def p_sort(e1, e2):
@@ -1690,9 +1690,9 @@ class Scheduler(object):
             self.get_actions_from_passives_satellites()
 
             # stats
-            nb_scheduled = len([c for c in self.checks.values() if c.status == 'scheduled'])
-            nb_inpoller = len([c for c in self.checks.values() if c.status == 'inpoller'])
-            nb_zombies = len([c for c in self.checks.values() if c.status == 'zombie'])
+            nb_scheduled = len([c for c in list(self.checks.values()) if c.status == 'scheduled'])
+            nb_inpoller = len([c for c in list(self.checks.values()) if c.status == 'inpoller'])
+            nb_zombies = len([c for c in list(self.checks.values()) if c.status == 'zombie'])
             nb_notifications = len(self.actions)
 
             logger.debug("Checks: total %s, scheduled %s,"

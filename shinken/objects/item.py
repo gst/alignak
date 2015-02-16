@@ -27,7 +27,7 @@
  elements like service, hosts or contacts.
 """
 import time
-import cPickle  # for hashing compute
+import pickle  # for hashing compute
 import itertools
 
 # Try to import md5 function
@@ -104,7 +104,7 @@ class Item(object):
                 elif key.startswith('_'):  # custom macro, not need to detect something here
                     _t = params[key]
                     # If it's a string, directly use this
-                    if isinstance(_t, basestring):
+                    if isinstance(_t, str):
                         val = _t
                     # aa list for a custom macro is not managed (conceptually invalid)
                     # so take the first defined
@@ -132,7 +132,7 @@ class Item(object):
 
             if (isinstance(val, list) and
                     len(val) >= 1 and
-                    isinstance(val[0], unicode) and
+                    isinstance(val[0], str) and
                     len(val[0]) >= 1 and
                     val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
@@ -168,7 +168,7 @@ class Item(object):
             return val
 
     def init_running_properties(self):
-        for prop, entry in self.__class__.running_properties.items():
+        for prop, entry in list(self.__class__.running_properties.items()):
             # Copy is slow, so we check type
             # Type with __iter__ are list or dict, or tuple.
             # Item need it's own list, so we copy
@@ -217,7 +217,7 @@ Like temporary attributes such as "imported_from", etc.. """
         """ Fill missing properties if they are missing """
         cls = self.__class__
 
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if not hasattr(self, prop) and entry.has_default:
                 setattr(self, prop, entry.default)
 
@@ -231,7 +231,7 @@ Like temporary attributes such as "imported_from", etc.. """
         #  (Contact, None)]}
         # get the name and put the value if None, put the Name
         # (not None) if not (not clear?)
-        for prop, entry in conf.properties.items():
+        for prop, entry in list(conf.properties.items()):
             # If we have a class_inherit, and the arbiter really send us it
             # if 'class_inherit' in entry and hasattr(conf, prop):
             if hasattr(conf, prop):
@@ -255,7 +255,7 @@ Like temporary attributes such as "imported_from", etc.. """
         i = self.id
         del self.id
         m = md5()
-        tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
+        tmp = pickle.dumps(self, pickle.HIGHEST_PROTOCOL)
         m.update(tmp)
         self.hash = m.digest()
         # and put again our id
@@ -403,7 +403,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
     def get_all_plus_and_delete(self):
         res = {}
-        props = self.plus.keys()  # we delete entries, so no for ... in ...
+        props = list(self.plus.keys())  # we delete entries, so no for ... in ...
         for prop in props:
             res[prop] = self.get_plus_and_delete(prop)
         return res
@@ -427,7 +427,7 @@ Like temporary attributes such as "imported_from", etc.. """
             for err in self.configuration_errors:
                 logger.error("[item::%s] %s", self.get_name(), err)
 
-        for prop, entry in properties.items():
+        for prop, entry in list(properties.items()):
             if not hasattr(self, prop) and entry.required:
                 logger.warning("[item::%s] %s property is missing", self.get_name(), prop)
                 state = False
@@ -442,7 +442,7 @@ Like temporary attributes such as "imported_from", etc.. """
     # in Classes that give such modifications to do.
     def old_properties_names_to_new(self):
         old_properties = getattr(self.__class__, "old_properties", {})
-        for old_name, new_name in old_properties.items():
+        for old_name, new_name in list(old_properties.items()):
             # Ok, if we got old_name and NO new name,
             # we switch the name
             if hasattr(self, old_name) and not hasattr(self, new_name):
@@ -453,7 +453,7 @@ Like temporary attributes such as "imported_from", etc.. """
     # The arbiter is asking us our raw value before all explode or linking
     def get_raw_import_values(self):
         r = {}
-        properties = self.__class__.properties.keys()
+        properties = list(self.__class__.properties.keys())
         # Register is not by default in the properties
         if 'register' not in properties:
             properties.append('register')
@@ -547,7 +547,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def prepare_for_conf_sending(self):
         cls = self.__class__
 
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             # Is this property need preparation for sending?
             if entry.conf_send_preparation is not None:
                 f = entry.conf_send_preparation
@@ -556,7 +556,7 @@ Like temporary attributes such as "imported_from", etc.. """
                     setattr(self, prop, val)
 
         if hasattr(cls, 'running_properties'):
-            for prop, entry in cls.running_properties.items():
+            for prop, entry in list(cls.running_properties.items()):
                 # Is this property need preparation for sending?
                 if entry.conf_send_preparation is not None:
                     f = entry.conf_send_preparation
@@ -584,7 +584,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             # Is this property intended for broking?
             if brok_type in entry.fill_brok:
                 data[prop] = self.get_property_value_for_brok(prop, cls.properties)
@@ -592,7 +592,7 @@ Like temporary attributes such as "imported_from", etc.. """
         # Maybe the class do not have running_properties
         if hasattr(cls, 'running_properties'):
             # We've got prop in running_properties too
-            for prop, entry in cls.running_properties.items():
+            for prop, entry in list(cls.running_properties.items()):
                 # if 'fill_brok' in cls.running_properties[prop]:
                 if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
@@ -689,7 +689,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
     def dump(self):
         dmp = {}
-        for prop in self.properties.keys():
+        for prop in list(self.properties.keys()):
             if not hasattr(self, prop):
                 continue
             attr = getattr(self, prop)
@@ -904,7 +904,7 @@ class Items(object):
         self.name_to_item.pop(getattr(item, name_property, ''), None)
 
     def __iter__(self):
-        return self.items.itervalues()
+        return iter(self.items.values())
 
     def __len__(self):
         return len(self.items)
@@ -963,8 +963,8 @@ class Items(object):
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(iter(self.items.values()),
+                                 iter(self.templates.values())):
             i.old_properties_names_to_new()
 
     def pythonize(self):
@@ -1012,8 +1012,8 @@ class Items(object):
     # graph too
     def linkify_templates(self):
         # First we create a list of all templates
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(iter(self.items.values()),
+                                 iter(self.templates.values())):
             self.linkify_item_templates(i)
         for i in self:
             i.tags = self.get_all_tags(i)
@@ -1085,8 +1085,8 @@ class Items(object):
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
-        for i in itertools.chain(self.items.itervalues(),
-                                 self.templates.itervalues()):
+        for i in itertools.chain(iter(self.items.values()),
+                                 iter(self.templates.values())):
             i.get_property_by_inheritance(prop)
             # If a "null" attribute was inherited, delete it
             try:
@@ -1381,7 +1381,7 @@ class Items(object):
             try:
                 hnames_list.extend(
                     self.get_hosts_from_hostgroups(hgnames, hostgroups))
-            except ValueError, e:
+            except ValueError as e:
                 item.configuration_errors.append(str(e))
 
         # Expands host names
@@ -1399,7 +1399,7 @@ class Items(object):
                 except KeyError:
                     pass
             elif h == '*':
-                [hnames.add(h.host_name) for h in hosts.items.itervalues()
+                [hnames.add(h.host_name) for h in hosts.items.values()
                  if getattr(h, 'host_name', '')]
             # Else it's an host to add, but maybe it's ALL
             else:

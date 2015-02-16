@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from db import DB
+from .db import DB
 from shinken.log import logger
 import sqlite3
 

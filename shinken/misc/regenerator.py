@@ -107,7 +107,7 @@ class Regenerator(object):
         self.manage_program_status_brok(b)
 
         # Now we will lie and directly map our objects :)
-        print "Regenerator::load_from_scheduler"
+        print("Regenerator::load_from_scheduler")
         self.hosts = c.hosts
         self.services = c.services
         self.notificationways = c.notificationways
@@ -167,7 +167,7 @@ class Regenerator(object):
         safe_print("In ALL Done linking phase for instance", inst_id)
         # check if the instance is really defined, so got ALL the
         # init phase
-        if inst_id not in self.configs.keys():
+        if inst_id not in list(self.configs.keys()):
             safe_print("Warning: the instance %d is not fully given, bailout" % inst_id)
             return
 
@@ -179,8 +179,8 @@ class Regenerator(object):
             inp_contactgroups = self.inp_contactgroups[inst_id]
             inp_services = self.inp_services[inst_id]
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp:
-            print "Warning all done: ", exp
+        except Exception as exp:
+            print("Warning all done: ", exp)
             return
 
         # Link HOSTGROUPS with hosts
@@ -530,8 +530,8 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_hosts = self.inp_hosts[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+        except Exception as exp:  # not good. we will cry in theprogram update
+            print("Not good!", exp)
             return
         # safe_print("Creating an host: %s in instance %d" % (hname, inst_id))
 
@@ -556,8 +556,8 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_hostgroups = self.inp_hostgroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+        except Exception as exp:  # not good. we will cry in theprogram update
+            print("Not good!", exp)
             return
 
         safe_print("Creating an hostgroup: %s in instance %d" % (hgname, inst_id))
@@ -582,8 +582,8 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_services = self.inp_services[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+        except Exception as exp:  # not good. we will cry in theprogram update
+            print("Not good!", exp)
             return
         # safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
 
@@ -608,8 +608,8 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+        except Exception as exp:  # not good. we will cry in theprogram update
+            print("Not good!", exp)
             return
 
         safe_print("Creating a servicegroup: %s in instance %d" % (sgname, inst_id))
@@ -689,8 +689,8 @@ class Regenerator(object):
         # Try to get the inp progress Contactgroups
         try:
             inp_contactgroups = self.inp_contactgroups[inst_id]
-        except Exception, exp:  # not good. we will cry in theprogram update
-            print "Not good!", exp
+        except Exception as exp:  # not good. we will cry in theprogram update
+            print("Not good!", exp)
             return
 
         safe_print("Creating an contactgroup: %s in instance %d" % (cgname, inst_id))
@@ -746,66 +746,66 @@ class Regenerator(object):
     def manage_initial_scheduler_status_brok(self, b):
         data = b.data
         scheduler_name = data['scheduler_name']
-        print "Creating Scheduler:", scheduler_name, data
+        print("Creating Scheduler:", scheduler_name, data)
         sched = SchedulerLink({})
-        print "Created a new scheduler", sched
+        print("Created a new scheduler", sched)
         self.update_element(sched, data)
-        print "Updated scheduler"
+        print("Updated scheduler")
         # print "CMD:", c
         self.schedulers[scheduler_name] = sched
-        print "scheduler added"
+        print("scheduler added")
 
 
     def manage_initial_poller_status_brok(self, b):
         data = b.data
         poller_name = data['poller_name']
-        print "Creating Poller:", poller_name, data
+        print("Creating Poller:", poller_name, data)
         poller = PollerLink({})
-        print "Created a new poller", poller
+        print("Created a new poller", poller)
         self.update_element(poller, data)
-        print "Updated poller"
+        print("Updated poller")
         # print "CMD:", c
         self.pollers[poller_name] = poller
-        print "poller added"
+        print("poller added")
 
 
     def manage_initial_reactionner_status_brok(self, b):
         data = b.data
         reactionner_name = data['reactionner_name']
-        print "Creating Reactionner:", reactionner_name, data
+        print("Creating Reactionner:", reactionner_name, data)
         reac = ReactionnerLink({})
-        print "Created a new reactionner", reac
+        print("Created a new reactionner", reac)
         self.update_element(reac, data)
-        print "Updated reactionner"
+        print("Updated reactionner")
         # print "CMD:", c
         self.reactionners[reactionner_name] = reac
-        print "reactionner added"
+        print("reactionner added")
 
 
     def manage_initial_broker_status_brok(self, b):
         data = b.data
         broker_name = data['broker_name']
-        print "Creating Broker:", broker_name, data
+        print("Creating Broker:", broker_name, data)
         broker = BrokerLink({})
-        print "Created a new broker", broker
+        print("Created a new broker", broker)
         self.update_element(broker, data)
-        print "Updated broker"
+        print("Updated broker")
         # print "CMD:", c
         self.brokers[broker_name] = broker
-        print "broker added"
+        print("broker added")
 
 
     def manage_initial_receiver_status_brok(self, b):
         data = b.data
         receiver_name = data['receiver_name']
-        print "Creating Receiver:", receiver_name, data
+        print("Creating Receiver:", receiver_name, data)
         receiver = ReceiverLink({})
-        print "Created a new receiver", receiver
+        print("Created a new receiver", receiver)
         self.update_element(receiver, data)
-        print "Updated receiver"
+        print("Updated receiver")
         # print "CMD:", c
         self.receivers[receiver_name] = receiver
-        print "receiver added"
+        print("receiver added")
 
 
 
@@ -813,7 +813,7 @@ class Regenerator(object):
     # So we got all data, we can link all together :)
     def manage_initial_broks_done_brok(self, b):
         inst_id = b.data['instance_id']
-        print "Finish the configuration of instance", inst_id
+        print("Finish the configuration of instance", inst_id)
         self.all_done_linking(inst_id)
 
 
@@ -830,11 +830,11 @@ class Regenerator(object):
 
         # If we got an update about an unknown instance, cry and ask for a full
         # version!
-        if c_id not in self.configs.keys():
+        if c_id not in list(self.configs.keys()):
             # Do not ask data too quickly, very dangerous
             # one a minute
             if time.time() - self.last_need_data_send > 60 and self.from_q is not None:
-                print "I ask the broker for instance id data:", c_id
+                print("I ask the broker for instance id data:", c_id)
                 msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id})
                 self.from_q.put(msg)
                 self.last_need_data_send = time.time()
@@ -877,7 +877,7 @@ class Regenerator(object):
 
             # If the topology change, update it
             if toplogy_change:
-                print "Topology change for", h.get_name(), h.parent_dependencies
+                print("Topology change for", h.get_name(), h.parent_dependencies)
                 self.linkify_host_and_hosts(h, 'parents')
                 self.linkify_host_and_hosts(h, 'childs')
                 self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')

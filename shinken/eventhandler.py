@@ -25,16 +25,14 @@
 
 import time
 
-from action import Action
+from .action import Action
 from shinken.property import IntegerProp, StringProp, FloatProp, BoolProp
 from shinken.autoslots import AutoSlots
 
 """ TODO: Add some comment about this class for the doc"""
-class EventHandler(Action):
+class EventHandler(Action, metaclass=AutoSlots):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
-
     my_type = 'eventhandler'
 
     properties = {

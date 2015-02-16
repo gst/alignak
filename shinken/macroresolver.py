@@ -34,6 +34,7 @@ import re
 import time
 
 from shinken.borg import Borg
+import collections
 
 
 class MacroResolver(Borg):
@@ -134,16 +135,16 @@ class MacroResolver(Borg):
     def _get_value_from_element(self, elt, prop):
         try:
             value = getattr(elt, prop)
-            if callable(value):
-                return unicode(value())
+            if isinstance(value, collections.Callable):
+                return str(value())
             else:
-                return unicode(value)
-        except AttributeError, exp:
+                return str(value)
+        except AttributeError as exp:
             # Return no value
             return ''
-        except UnicodeError, exp:
+        except UnicodeError as exp:
             if isinstance(value, str):
-                return unicode(value, 'utf8', errors='ignore')
+                return str(value, 'utf8', errors='ignore')
             else:
                 return ''
 

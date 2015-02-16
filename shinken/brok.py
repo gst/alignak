@@ -22,7 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import cPickle
+import pickle
 
 
 class Brok:
@@ -37,7 +37,7 @@ class Brok:
         self.type = type
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.data = cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL)
+        self.data = pickle.dumps(data, pickle.HIGHEST_PROTOCOL)
         self.prepared = False
 
 
@@ -51,7 +51,7 @@ class Brok:
         # Maybe the brok is a old daemon one or was already prepared
         # if so, the data is already ok
         if hasattr(self, 'prepared') and not self.prepared:
-            self.data = cPickle.loads(self.data)
+            self.data = pickle.loads(self.data)
             if hasattr(self, 'instance_id'):
                 self.data['instance_id'] = self.instance_id
         self.prepared = True

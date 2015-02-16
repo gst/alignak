@@ -49,13 +49,9 @@ from shinken.eventhandler import EventHandler
 from shinken.log import logger, naglog_result
 
 
-class Service(SchedulingItem):
+class Service(SchedulingItem, metaclass=AutoSlots):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
-
-    # Every service have a unique ID, and 0 is always special in
-    # database and co...
     id = 1
     # The host and service do not have the same 0 value, now yes :)
     ok_up = 'OK'
@@ -256,7 +252,7 @@ class Service(SchedulingItem):
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'modified_attributes':
-            IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+            IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_chk':
             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':
@@ -618,7 +614,7 @@ class Service(SchedulingItem):
         special_properties = ('check_period', 'notification_interval', 'host_name',
                               'hostgroup_name', 'notification_period')
 
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("The service %s on host '%s' does not have %s", desc, hname, prop)
@@ -939,9 +935,9 @@ class Service(SchedulingItem):
 
     # The last time when the state was not OK
     def last_time_non_ok_or_up(self):
-        non_ok_times = filter(lambda x: x > self.last_time_ok, [self.last_time_warning,
+        non_ok_times = [x for x in [self.last_time_warning,
                                                                 self.last_time_critical,
-                                                                self.last_time_unknown])
+                                                                self.last_time_unknown] if x > self.last_time_ok]
         if len(non_ok_times) == 0:
             last_time_non_ok = 0  # program_start would be better
         else:
@@ -1417,7 +1413,7 @@ class Services(Items):
                           (self.get_name(), hst_name)
                     s.configuration_warnings.append(err)
                     continue
-            except AttributeError, exp:
+            except AttributeError as exp:
                 pass  # Will be catch at the is_correct moment
 
     # We look for servicegroups property in services and
@@ -1688,7 +1684,7 @@ class Services(Items):
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        for id in self.items.keys():
+        for id in list(self.items.keys()):
             s = self.items[id]
             # items::explode_host_groups_into_hosts
             # take all hosts from our hostgroup_name into our host_name property
@@ -1712,7 +1708,7 @@ class Services(Items):
                 if not s.configuration_errors:
                     self.remove_item(s)
 
-        for id in self.templates.keys():
+        for id in list(self.templates.keys()):
             t = self.templates[id]
             self.explode_contact_groups_into_contacts(t, contactgroups)
             self.explode_services_from_templates(hosts, t)

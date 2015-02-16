@@ -167,7 +167,7 @@ class BoolProp(Property):
         if isinstance(val, bool):
             return val
         val = unique_value(val).lower()
-        if val in _boolean_states.keys():
+        if val in list(_boolean_states.keys()):
             return _boolean_states[val]
         else:
             raise PythonizeError("Cannot convert '%s' to a boolean value" % val)
@@ -268,7 +268,7 @@ class DictProp(Property):
             return val
 
         # val is in the form "key1=addr:[port],key2=addr:[port],..."
-        print ">>>", dict([split(kv) for kv in to_split(val)])
+        print(">>>", dict([split(kv) for kv in to_split(val)]))
         return dict([split(kv) for kv in to_split(val)])
 
 

@@ -129,7 +129,7 @@ class Servicedependencies(Items):
 
         # Then for every host create a copy of the service with just the host
         # because we are adding services, we can't just loop in it
-        servicedeps = self.items.keys()
+        servicedeps = list(self.items.keys())
         for id in servicedeps:
             sd = self.items[id]
             # Have we to explode the hostgroup into many service?
@@ -268,7 +268,7 @@ class Servicedependencies(Items):
                 tp_name = sd.dependency_period
                 tp = timeperiods.find_by_name(tp_name)
                 sd.dependency_period = tp
-            except AttributeError, exp:
+            except AttributeError as exp:
                 logger.error("[servicedependency] fail to linkify by timeperiods: %s", exp)
 
     # We backport service dep to service. So SD is not need anymore

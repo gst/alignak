@@ -117,7 +117,7 @@ class DataManager(object):
         return self.rg.reactionners
 
     def get_program_start(self):
-        for c in self.rg.configs.values():
+        for c in list(self.rg.configs.values()):
             return c.program_start
         return None
 
@@ -132,7 +132,7 @@ class DataManager(object):
     # Get the hosts tags sorted by names, and zero size in the end
     def get_host_tags_sorted(self):
         r = []
-        names = self.rg.tags.keys()
+        names = list(self.rg.tags.keys())
         names.sort()
         for n in names:
             r.append((n, self.rg.tags[n]))
@@ -149,7 +149,7 @@ class DataManager(object):
     # Get the services tags sorted by names, and zero size in the end
     def get_service_tags_sorted(self):
         r = []
-        names = self.rg.services_tags.keys()
+        names = list(self.rg.services_tags.keys())
         names.sort()
         for n in names:
             r.append((n, self.rg.services_tags[n]))
@@ -243,7 +243,7 @@ class DataManager(object):
                     if (s.business_impact > 2 and not 0 <= s.my_own_business_impact <= 2)])
         res.extend([h for h in self.rg.hosts
                     if (h.business_impact > 2 and not 0 <= h.my_own_business_impact <= 2)])
-        print "DUMP IMPORTANT"
+        print("DUMP IMPORTANT")
         for i in res:
             safe_print(i.get_full_name(), i.business_impact, i.my_own_business_impact)
         return res
@@ -255,7 +255,7 @@ class DataManager(object):
                     if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
         s_states = [s.state_id for s in self.rg.services
                     if s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
-        print "get_overall_state:: hosts and services business problems", h_states, s_states
+        print("get_overall_state:: hosts and services business problems", h_states, s_states)
         if len(h_states) == 0:
             h_state = 0
         else:
@@ -313,7 +313,7 @@ class DataManager(object):
                     if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
         s_states = [s.state_id for s in self.rg.services
                     if s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
-        print "get_len_overall_state:: hosts and services business problems", h_states, s_states
+        print("get_len_overall_state:: hosts and services business problems", h_states, s_states)
         # Just return the number of impacting elements
         return len(h_states) + len(s_states)
 
@@ -330,7 +330,7 @@ class DataManager(object):
                 par_elts = self.get_business_parents(i, levels=levels - 1)
                 res['fathers'].append(par_elts)
 
-        print "get_business_parents::Give elements", res
+        print("get_business_parents::Give elements", res)
         return res
 
     # Ok, we do not have true root problems, but we can try to guess isn't it?

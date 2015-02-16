@@ -43,17 +43,17 @@ try:
 except ImportError:
     is_android = False
 
-from Queue import Empty
+from queue import Empty
 
 if not is_android:
     from multiprocessing import Queue, active_children, cpu_count
 else:
-    from Queue import Queue
+    from queue import Queue
 
 import os
 import copy
 import time
-import cPickle
+import pickle
 import traceback
 import zlib
 import base64
@@ -119,7 +119,7 @@ class IForArbiter(Interface):
     # Used by the Arbiter to push broks to broker
     def push_broks(self, broks):
         with self.app.arbiter_broks_lock:
-            self.app.arbiter_broks.extend(broks.values())
+            self.app.arbiter_broks.extend(list(broks.values()))
     push_broks.method = 'post'
     # We are using a Lock just for NOT lock this call from the arbiter :)
     push_broks.need_lock = False
@@ -132,7 +132,7 @@ class IForArbiter(Interface):
     def get_external_commands(self):
         with self.app.external_commands_lock:
             cmds = self.app.get_external_commands()
-            raw = cPickle.dumps(cmds)
+            raw = pickle.dumps(cmds)
         return raw
     get_external_commands.need_lock = False
     get_external_commands.doc = doc
@@ -173,7 +173,7 @@ class ISchedulers(Interface):
         # print "A scheduler ask me the returns", sched_id
         ret = self.app.get_return_for_passive(int(sched_id))
         # print "Send mack", len(ret), "returns"
-        return cPickle.dumps(ret)
+        return pickle.dumps(ret)
     get_returns.doc = doc
 
 
@@ -188,7 +188,7 @@ class IBroks(Interface):
     # poller or reactionner ask us actions
     def get_broks(self, bname):
         res = self.app.get_broks()
-        return base64.b64encode(zlib.compress(cPickle.dumps(res), 2))
+        return base64.b64encode(zlib.compress(pickle.dumps(res), 2))
     get_broks.doc = doc
 
 
@@ -208,7 +208,7 @@ class IStats(Interface):
             res[sched_id] = lst
             for mod in app.q_by_mod:
                 # In workers we've got actions send to queue - queue size
-                for (i, q) in app.q_by_mod[mod].items():
+                for (i, q) in list(app.q_by_mod[mod].items()):
                     lst.append({
                         'scheduler_name': sched['name'],
                         'module': mod,
@@ -259,7 +259,7 @@ class BaseSatellite(Daemon):
     # for me it's the ids of my schedulers
     def what_i_managed(self):
         r = {}
-        for (k, v) in self.schedulers.iteritems():
+        for (k, v) in self.schedulers.items():
             r[k] = v['push_flavor']
         return r
 
@@ -330,7 +330,7 @@ class Satellite(BaseSatellite):
             sch_con = sched['con'] = HTTPClient(
                 uri=uri, strong_ssl=sched['hard_ssl_name_check'],
                 timeout=timeout, data_timeout=data_timeout)
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s",
                            self.name, sname, str(exp))
             sched['con'] = None
@@ -341,7 +341,7 @@ class Satellite(BaseSatellite):
         try:
             new_run_id = sch_con.get('get_running_id')
             new_run_id = float(new_run_id)
-        except (HTTPExceptions, cPickle.PicklingError, KeyError), exp:
+        except (HTTPExceptions, pickle.PicklingError, KeyError) as exp:
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s",
                            self.name, sname, str(exp))
             sched['con'] = None
@@ -417,20 +417,20 @@ class Satellite(BaseSatellite):
                 continue
             # Now ret have all verifs, we can return them
             send_ok = False
-            ret = sched['wait_homerun'].values()
+            ret = list(sched['wait_homerun'].values())
             if ret is not []:
                 try:
                     con = sched['con']
                     if con is not None:  # None = not initialized
                         send_ok = con.post('put_results', {'results': ret})
                 # Not connected or sched is gone
-                except (HTTPExceptions, KeyError), exp:
+                except (HTTPExceptions, KeyError) as exp:
                     logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError, exp:  # the scheduler must  not be initialized
+                except AttributeError as exp:  # the scheduler must  not be initialized
                     logger.error('manage_returns exception:: %s,%s ', type(exp), str(exp))
-                except Exception, exp:
+                except Exception as exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                     raise
 
@@ -451,10 +451,10 @@ class Satellite(BaseSatellite):
             return []
 
         sched = self.schedulers[sched_id]
-        logger.debug("Preparing to return %s", str(sched['wait_homerun'].values()))
+        logger.debug("Preparing to return %s", str(list(sched['wait_homerun'].values())))
 
         # prepare our return
-        ret = copy.copy(sched['wait_homerun'].values())
+        ret = copy.copy(list(sched['wait_homerun'].values()))
 
         # and clear our dict
         sched['wait_homerun'].clear()
@@ -473,7 +473,7 @@ class Satellite(BaseSatellite):
                 q = self.manager.Queue()
         # If we got no /dev/shm on linux, we can got problem here.
         # Must raise with a good message
-        except OSError, exp:
+        except OSError as exp:
             # We look for the "Function not implemented" under Linux
             if exp.errno == 38 and os.name == 'posix':
                 logger.critical("Got an exception (%s). If you are under Linux, "
@@ -515,7 +515,7 @@ class Satellite(BaseSatellite):
     # modules and sockets
     def do_stop(self):
         logger.info("[%s] Stopping all workers", self.name)
-        for w in self.workers.values():
+        for w in list(self.workers.values()):
             try:
                 w.terminate()
                 w.join(timeout=1)
@@ -569,7 +569,7 @@ class Satellite(BaseSatellite):
             active_children()
 
         w_to_del = []
-        for w in self.workers.values():
+        for w in list(self.workers.values()):
             # If a worker goes down and we did not ask him, it's not
             # good: we can think that we have a worker and it's not True
             # So we del it
@@ -590,7 +590,7 @@ class Satellite(BaseSatellite):
 
             for sched_id in self.schedulers:
                 sched = self.schedulers[sched_id]
-                for a in sched['actions'].values():
+                for a in list(sched['actions'].values()):
                     if a.status == 'queue' and a.worker_id == id:
                         # Got a check that will NEVER return if we do not
                         # restart it
@@ -646,7 +646,7 @@ class Satellite(BaseSatellite):
     def _got_queue_from_action(self, a):
         # get the module name, if not, take fork
         mod = getattr(a, 'module_type', 'fork')
-        queues = self.q_by_mod[mod].items()
+        queues = list(self.q_by_mod[mod].items())
 
         # Maybe there is no more queue, it's very bad!
         if len(queues) == 0:
@@ -722,13 +722,13 @@ class Satellite(BaseSatellite):
                         'poller_tags': self.poller_tags,
                         'reactionner_tags': self.reactionner_tags,
                         'worker_name': self.name,
-                        'module_types': self.q_by_mod.keys()
+                        'module_types': list(self.q_by_mod.keys())
                     },
                         wait='long')
                     # Explicit pickle load
                     tmp = base64.b64decode(tmp)
                     tmp = zlib.decompress(tmp)
-                    tmp = cPickle.loads(str(tmp))
+                    tmp = pickle.loads(str(tmp))
                     logger.debug("Ask actions to %d, got %d", sched_id, len(tmp))
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
@@ -737,16 +737,16 @@ class Satellite(BaseSatellite):
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
-            except (HTTPExceptions, KeyError), exp:
+            except (HTTPExceptions, KeyError) as exp:
                 logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
-            except AttributeError, exp:
+            except AttributeError as exp:
                 logger.debug('get_new_actions exception:: %s,%s ', type(exp), str(exp))
             # What the F**k? We do not know what happened,
             # log the error message if possible.
-            except Exception, exp:
+            except Exception as exp:
                 logger.error("A satellite raised an unknown exception: %s (%s)", exp, type(exp))
                 raise
 
@@ -831,7 +831,7 @@ class Satellite(BaseSatellite):
             sched = self.schedulers[sched_id]
             for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
-                for (i, q) in self.q_by_mod[mod].items():
+                for (i, q) in list(self.q_by_mod[mod].items()):
                     logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)",
                                  sched_id, sched['name'], mod,
                                  i, q.qsize(), self.get_returns_queue_len())
@@ -844,7 +844,7 @@ class Satellite(BaseSatellite):
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
         for mod in self.q_by_mod:
-            for q in self.q_by_mod[mod].values():
+            for q in list(self.q_by_mod[mod].values()):
                 total_q += q.qsize()
         if total_q != 0 and wait_ratio < 2 * self.polling_interval:
             logger.debug("I decide to up wait ratio")
@@ -1113,7 +1113,7 @@ class Satellite(BaseSatellite):
             self.modules_manager.start_external_instances()
 
             # Allocate Mortal Threads
-            for _ in xrange(1, self.min_workers):
+            for _ in range(1, self.min_workers):
                 to_del = []
                 for mod in self.q_by_mod:
                     try:

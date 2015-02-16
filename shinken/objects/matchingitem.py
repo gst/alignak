@@ -30,7 +30,7 @@
 
 import re
 
-from item import Item
+from .item import Item
 
 
 class MatchingItem(Item):
@@ -59,7 +59,7 @@ class MatchingItem(Item):
         values = value.split(',')
         for m in matchings:
             for v in values:
-                print "Try to match", m, v
+                print("Try to match", m, v)
                 # Maybe m is a list, if so should check one values
                 if isinstance(m, list):
                     for _m in m:
@@ -82,7 +82,7 @@ class MatchingItem(Item):
         for m in self.matches:
             # print "Compare to", m
             match_one = False
-            for (k, v) in datas.iteritems():
+            for (k, v) in datas.items():
                 # We found at least one of our match key
                 if m == k:
                     if self.is_matching(k, v):
@@ -100,7 +100,7 @@ class MatchingItem(Item):
         for m in self.not_matches:
             # print "Compare to NOT", m
             match_one = False
-            for (k, v) in datas.iteritems():
+            for (k, v) in datas.items():
                 # print "K,V", k,v
                 # We found at least one of our match key
                 if m == k:

@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
+from .item import Item, Items
 from shinken.brok import Brok
 from shinken.property import StringProp, IntegerProp, BoolProp
 from shinken.autoslots import AutoSlots
@@ -36,11 +36,9 @@ class DummyCommand(object):
     pass
 
 
-class Command(Item):
+class Command(Item, metaclass=AutoSlots):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
-
     id = 0
     my_type = "command"
 
@@ -102,7 +100,7 @@ class Command(Item):
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
         # Now config properties
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             # Is this property intended for broking?
             # if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
@@ -144,7 +142,7 @@ class Command(Item):
     # 'module_type': 'fork', 'command_name': u'notify-by-rss'})
     def __setstate_pre_1_0__(self, state):
         for d in state:
-            for k, v in d.items():
+            for k, v in list(d.items()):
                 setattr(self, k, v)
 
 

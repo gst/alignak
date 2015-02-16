@@ -29,10 +29,10 @@ import time
 import signal
 import select
 import random
-import ConfigParser
+import configparser
 import threading
 import traceback
-import cStringIO
+import io
 import logging
 import inspect
 
@@ -70,7 +70,7 @@ try:
 
     def get_all_groups():
         return getgrall()
-except ImportError, exp:  # Like in nt system or Android
+except ImportError as exp:  # Like in nt system or Android
     # temporary workaround:
     def get_cur_user():
         return "shinken"
@@ -86,7 +86,7 @@ except ImportError, exp:  # Like in nt system or Android
 # The standard I/O file descriptors are redirected to /dev/null by default.
 REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
-UMASK = 027
+UMASK = 0o27
 from shinken.bin import VERSION
 
 """ TODO: Add some comment about this class for the doc"""
@@ -170,7 +170,7 @@ class Interface(object):
     doc = 'List the api methods and their parameters'
     def api_full(self):
         res = {}
-        for (fname, f) in self.app.http_daemon.registered_fun.iteritems():
+        for (fname, f) in self.app.http_daemon.registered_fun.items():
             fclean = fname.replace('_', '-')
             argspec = inspect.getargspec(f)
             args = [a for a in argspec.args if a != 'self']
@@ -178,7 +178,7 @@ class Interface(object):
             e = {}
             # Get a string about the args and co
             _s_nondef_args = ', '.join([a for a in args if a not in defaults])
-            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.iteritems()])
+            _s_def_args = ', '.join(['%s=%s' % (k, v) for (k, v) in defaults.items()])
             _s_args = ''
             if _s_nondef_args:
                 _s_args += _s_nondef_args
@@ -388,7 +388,7 @@ class Daemon(object):
         self.workdir = os.path.abspath(self.workdir)
         try:
             os.chdir(self.workdir)
-        except Exception, e:
+        except Exception as e:
             raise InvalidWorkDir(e)
         self.debug_output.append("Successfully changed to workdir: %s" % (self.workdir))
 
@@ -397,7 +397,7 @@ class Daemon(object):
         logger.debug("Unlinking %s", self.pidfile)
         try:
             os.unlink(self.pidfile)
-        except Exception, e:
+        except Exception as e:
             logger.error("Got an error unlinking our pidfile: %s", e)
 
 
@@ -408,7 +408,7 @@ class Daemon(object):
             try:
                 # self.local_log_fd = self.log.register_local_log(self.local_log)
                 self.local_log_fd = logger.register_local_log(self.local_log)
-            except IOError, exp:
+            except IOError as exp:
                 logger.error("Opening the log file '%s' failed with '%s'", self.local_log, exp)
                 sys.exit(2)
             logger.info("Using the local log file '%s'", self.local_log)
@@ -539,7 +539,7 @@ class Daemon(object):
         # Now the fork/setsid/fork..
         try:
             pid = os.fork()
-        except OSError, e:
+        except OSError as e:
             raise Exception("%s [%d]" % (e.strerror, e.errno))
 
         if pid != 0:
@@ -596,7 +596,7 @@ class Daemon(object):
                 try:
                     # Be sure to release the lock so there won't be lock in shutdown phase
                     daemon.lock.release()
-                except Exception, exp:
+                except Exception as exp:
                     pass
                 daemon.shutdown()
             # Some multiprocessing lib got problems with start() that cannot take args
@@ -709,7 +709,7 @@ class Daemon(object):
             return []
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
-        except select.error, e:
+        except select.error as e:
             errnum, _ = e
             if errnum == errno.EINTR:
                 return []
@@ -747,7 +747,7 @@ class Daemon(object):
     def find_uid_from_name(self):
         try:
             return getpwnam(self.user)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             logger.error("The user %s is unknown", self.user)
             return None
 
@@ -755,7 +755,7 @@ class Daemon(object):
     def find_gid_from_name(self):
         try:
             return getgrnam(self.group)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             logger.error("The group %s is unknown", self.group)
             return None
 
@@ -795,7 +795,7 @@ class Daemon(object):
             logger.info('Trying to initialize additional groups for the daemon')
             try:
                 os.initgroups(self.user, gid)
-            except OSError, e:
+            except OSError as e:
                 logger.warning('Cannot call the additional groups setting with initgroups (%s)',
                                e.strerror)
         elif hasattr(os, 'setgroups'):
@@ -803,14 +803,14 @@ class Daemon(object):
                      [group.gr_gid for group in get_all_groups() if self.user in group.gr_mem]
             try:
                 os.setgroups(groups)
-            except OSError, e:
+            except OSError as e:
                 logger.warning('Cannot call the additional groups setting with setgroups (%s)',
                                e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
-        except OSError, e:
+        except OSError as e:
             logger.error("cannot change user/group to %s/%s (%s [%d]). Exiting",
                          self.user, self.group, e.strerror, e.errno)
             sys.exit(2)
@@ -822,7 +822,7 @@ class Daemon(object):
     def parse_config_file(self):
         properties = self.__class__.properties
         if self.config_file is not None:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
                 logger.error("Bad or missing config file: %s ", self.config_file)
@@ -832,7 +832,7 @@ class Daemon(object):
                     if key in properties:
                         value = properties[key].pythonize(value)
                     setattr(self, key, value)
-            except ConfigParser.InterpolationMissingOptionError, e:
+            except configparser.InterpolationMissingOptionError as e:
                 e = str(e)
                 wrong_variable = e.split('\n')[3].split(':')[1].strip()
                 logger.error("Incorrect or missing variable '%s' in config file : %s",
@@ -841,7 +841,7 @@ class Daemon(object):
         else:
             logger.warning("No config file specified, use defaults parameters")
         # Now fill all defaults where missing parameters
-        for prop, entry in properties.items():
+        for prop, entry in list(properties.items()):
             if not hasattr(self, prop):
                 value = entry.pythonize(entry.default)
                 setattr(self, prop, value)
@@ -852,7 +852,7 @@ class Daemon(object):
     def relative_paths_to_full(self, reference_path):
         # print "Create relative paths with", reference_path
         properties = self.__class__.properties
-        for prop, entry in properties.items():
+        for prop, entry in list(properties.items()):
             if isinstance(entry, ConfigPathProp):
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
@@ -913,9 +913,9 @@ class Daemon(object):
         # finish
         try:
             self.http_daemon.run()
-        except Exception, exp:
+        except Exception as exp:
             logger.error('The HTTP daemon failed with the error %s, exiting', str(exp))
-            output = cStringIO.StringIO()
+            output = io.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this error: %s", output.getvalue())
             output.close()

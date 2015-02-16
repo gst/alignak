@@ -29,18 +29,16 @@ no use in running part
 """
 
 
-from item import Item, Items
+from .item import Item, Items
 
 from shinken.autoslots import AutoSlots
 from shinken.util import to_hostnames_list
 from shinken.property import StringProp, ListProp
 
 
-class HostExtInfo(Item):
+class HostExtInfo(Item, metaclass=AutoSlots):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
-    __metaclass__ = AutoSlots
-
     id = 1  # zero is reserved for host (primary node for parents)
     my_type = 'hostextinfo'
 

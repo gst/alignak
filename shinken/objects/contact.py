@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from item import Item, Items
+from .item import Item, Items
 
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
@@ -82,7 +82,7 @@ class Contact(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-        'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
+        'modified_attributes': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'downtimes': StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
 
@@ -173,7 +173,7 @@ class Contact(Item):
         cls = self.__class__
 
         # All of the above are checks in the notificationways part
-        for prop, entry in cls.properties.items():
+        for prop, entry in list(cls.properties.items()):
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("[contact::%s] %s property not set", self.get_name(), prop)

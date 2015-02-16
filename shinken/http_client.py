@@ -23,15 +23,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import cPickle
+import pickle
 import zlib
 import json
 
 # Pycurl part
 import pycurl
 pycurl.global_init(pycurl.GLOBAL_ALL)
-import urllib
-from StringIO import StringIO
+import urllib.request, urllib.parse, urllib.error
+from io import StringIO
 
 from shinken.bin import VERSION
 from shinken.log import logger
@@ -110,14 +110,14 @@ class HTTPClient(object):
         else:
             c.setopt(c.TIMEOUT, self.data_timeout)
 
-        c.setopt(c.URL, str(self.uri + path + '?' + urllib.urlencode(args)))
+        c.setopt(c.URL, str(self.uri + path + '?' + urllib.parse.urlencode(args)))
         # Ok now manage the response
         response = StringIO()
         c.setopt(pycurl.WRITEFUNCTION, response.write)
 
         try:
             c.perform()
-        except pycurl.error, error:
+        except pycurl.error as error:
             errno, errstr = error
             raise HTTPException('Connexion error to %s : %s' % (self.uri, errstr))
         r = c.getinfo(pycurl.HTTP_CODE)
@@ -137,8 +137,8 @@ class HTTPClient(object):
     def post(self, path, args, wait='short'):
         size = 0
         # Take args, pickle them and then compress the result
-        for (k, v) in args.iteritems():
-            args[k] = zlib.compress(cPickle.dumps(v), 2)
+        for (k, v) in args.items():
+            args[k] = zlib.compress(pickle.dumps(v), 2)
             size += len(args[k])
         # Ok go for it!
         logger.debug('Posting to %s: %sB' % (self.uri + path, size))
@@ -157,7 +157,7 @@ class HTTPClient(object):
         # if proxy:
         #    c.setopt(c.PROXY, proxy)
         # Pycurl want a list of tuple as args
-        postargs = [(k, v) for (k, v) in args.iteritems()]
+        postargs = [(k, v) for (k, v) in args.items()]
         c.setopt(c.HTTPPOST, postargs)
         c.setopt(c.URL, str(self.uri + path))
         # Ok now manage the response
@@ -215,7 +215,7 @@ class HTTPClient(object):
         # c.setopt(c.VERBOSE, 1)
         try:
             c.perform()
-        except pycurl.error, error:
+        except pycurl.error as error:
             errno, errstr = error
             f.close()
             raise HTTPException('Connexion error to %s : %s' % (self.uri, errstr))

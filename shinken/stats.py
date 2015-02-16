@@ -108,7 +108,7 @@ class Stats(object):
         try:
             self.statsd_addr = (socket.gethostbyname(self.statsd_host), self.statsd_port)
             self.statsd_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        except (socket.error, socket.gaierror), exp:
+        except (socket.error, socket.gaierror) as exp:
             logger.error('Cannot create statsd socket: %s' % exp)
             return
 
@@ -130,7 +130,7 @@ class Stats(object):
             packet = '%s.%s.%s: %d|ms' % (self.statsd_prefix, self.name, k, v * 1000)
             try:
                 self.statsd_sock.sendto(packet, self.statsd_addr)
-            except (socket.error, socket.gaierror), exp:
+            except (socket.error, socket.gaierror) as exp:
                 pass  # cannot send? ok not a huge problem here and cannot
                 # log because it will be far too verbose :p
 
@@ -160,7 +160,7 @@ class Stats(object):
             self.stats = {}
 
             if len(stats) != 0:
-                s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.iteritems()])
+                s = ', '.join(['%s:%s' % (k, v) for (k, v) in stats.items()])
             # If we are not in an initializer daemon we skip, we cannot have a real name, it sucks
             # to find the data after this
             if not self.name or not self.api_key or not self.secret:
@@ -168,7 +168,7 @@ class Stats(object):
                 continue
 
             metrics = []
-            for (k, e) in stats.iteritems():
+            for (k, e) in stats.items():
                 nk = '%s.%s.%s' % (self.type, self.name, k)
                 _min, _max, nb, _sum = e
                 _avg = float(_sum) / nb
@@ -196,7 +196,7 @@ class Stats(object):
                 encrypted_text = self._encrypt(j)
                 try:
                     r = self.con.put('/api/v1/put/?api_key=%s' % (self.api_key), encrypted_text)
-                except HTTPException, exp:
+                except HTTPException as exp:
                     logger.debug('Stats REAPER cannot put to the metric server %s' % exp)
             time.sleep(60)
 

@@ -25,7 +25,7 @@
 
 import time
 
-import cPickle
+import pickle
 
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects.item import Item, Items
@@ -125,9 +125,9 @@ class SatelliteLink(Item):
         try:
             self.con.get('ping')
             self.con.post('put_conf', {'conf': conf}, wait='long')
-            print "PUT CONF SUCESS", self.get_name()
+            print("PUT CONF SUCESS", self.get_name())
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             logger.error("Failed sending configuration for %s: %s", self.get_name(), str(exp))
             return False
@@ -230,7 +230,7 @@ class SatelliteLink(Item):
                 self.set_alive()
             else:
                 self.add_failed_check_attempt()
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.add_failed_check_attempt(reason=str(exp))
 
 
@@ -240,7 +240,7 @@ class SatelliteLink(Item):
         try:
             r = self.con.get('wait_new_conf')
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -261,11 +261,11 @@ class SatelliteLink(Item):
                 r = self.con.get('have_conf')
             else:
                 r = self.con.get('have_conf', {'magic_hash': magic_hash})
-            print "have_conf RAW CALL", r, type(r)
+            print("have_conf RAW CALL", r, type(r))
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -285,7 +285,7 @@ class SatelliteLink(Item):
             if not isinstance(r, bool):
                 return False
             return r
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -301,7 +301,7 @@ class SatelliteLink(Item):
         try:
             self.con.get('remove_from_conf', {'sched_id': sched_id})
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -317,33 +317,33 @@ class SatelliteLink(Item):
 
         try:
             tab = self.con.get('what_i_managed')
-            print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
+            print("[%s]What i managed raw value is %s" % (self.get_name(), tab))
 
             # Protect against bad return
             if not isinstance(tab, dict):
-                print "[%s]What i managed: Got exception: bad what_i_managed returns" % \
-                      self.get_name(), tab
+                print("[%s]What i managed: Got exception: bad what_i_managed returns" % \
+                      self.get_name(), tab)
                 self.con = None
                 self.managed_confs = {}
                 return
 
             # Ok protect against json that is chaning keys as string instead of int
             tab_cleaned = {}
-            for (k, v) in tab.iteritems():
+            for (k, v) in tab.items():
                 try:
                     tab_cleaned[int(k)] = v
                 except ValueError:
-                    print "[%s]What i managed: Got exception: bad what_i_managed returns" % \
-                          self.get_name(), tab
+                    print("[%s]What i managed: Got exception: bad what_i_managed returns" % \
+                          self.get_name(), tab)
             # We can update our list now
             self.managed_confs = tab_cleaned
-        except HTTPExceptions, exp:
-            print "EXCEPTION INwhat_i_managed", str(exp)
+        except HTTPExceptions as exp:
+            print("EXCEPTION INwhat_i_managed", str(exp))
             # A timeout is not a crime, put this case aside
             # TODO : fix the timeout part?
             self.con = None
-            print "[%s]What i managed: Got exception: %s %s %s" % \
-                  (self.get_name(), exp, type(exp), exp.__dict__)
+            print("[%s]What i managed: Got exception: %s %s %s" % \
+                  (self.get_name(), exp, type(exp), exp.__dict__))
             self.managed_confs = {}
 
 
@@ -369,7 +369,7 @@ class SatelliteLink(Item):
             self.con.get('ping')
             self.con.post('push_broks', {'broks': broks}, wait='long')
             return True
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return False
 
@@ -385,13 +385,13 @@ class SatelliteLink(Item):
         try:
             self.con.get('ping')
             tab = self.con.get('get_external_commands', wait='long')
-            tab = cPickle.loads(str(tab))
+            tab = pickle.loads(str(tab))
             # Protect against bad return
             if not isinstance(tab, list):
                 self.con = None
                 return []
             return tab
-        except HTTPExceptions, exp:
+        except HTTPExceptions as exp:
             self.con = None
             return []
         except AttributeError:
@@ -402,7 +402,7 @@ class SatelliteLink(Item):
     def prepare_for_conf(self):
         self.cfg = {'global': {}, 'schedulers': {}, 'arbiters': {}}
         properties = self.__class__.properties
-        for prop, entry in properties.items():
+        for prop, entry in list(properties.items()):
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
         cls = self.__class__

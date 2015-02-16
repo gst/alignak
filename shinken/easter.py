@@ -36,21 +36,21 @@ def episode_iv():
 
 
 def perdu():
-    import urllib
-    f = urllib.urlopen("http://www.perdu.com")
+    import urllib.request, urllib.parse, urllib.error
+    f = urllib.request.urlopen("http://www.perdu.com")
     logger.info(f.read())
 
 
 def myip():
-    import urllib
-    f = urllib.urlopen("http://whatismyip.org/")
+    import urllib.request, urllib.parse, urllib.error
+    f = urllib.request.urlopen("http://whatismyip.org/")
     logger.info(f.read())
 
 
 def naheulbeuk():
     import os
-    import urllib2
-    from cStringIO import StringIO
+    import urllib.request, urllib.error, urllib.parse
+    from io import StringIO
 
     from PIL import Image
     import aalib
@@ -60,7 +60,7 @@ def naheulbeuk():
     else:
         screen = aalib.AnsiScreen
     screen = screen(width=128, height=128)
-    fp = StringIO(urllib2.urlopen(
+    fp = StringIO(urllib.request.urlopen(
         'http://www.penofchaos.com/warham/bd/images/NBK-win7portrait-Nain02.JPG').read())
     image = Image.open(fp).convert('L').resize(screen.virtual_size)
     screen.put_image((0, 0), image)

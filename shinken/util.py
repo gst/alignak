@@ -40,7 +40,7 @@ from shinken.log import logger
 try:
     stdout_encoding = sys.stdout.encoding
     safe_stdout = (stdout_encoding == 'UTF-8')
-except Exception, exp:
+except Exception as exp:
     logger.error('Encoding detection error= %s', exp)
     safe_stdout = False
 
@@ -55,13 +55,13 @@ def safe_print(*args):
         # utf8, go in ascii mode
         if isinstance(e, str):
             if safe_stdout:
-                s = unicode(e, 'utf8', errors='ignore')
+                s = str(e, 'utf8', errors='ignore')
             else:
                 s = e.decode('ascii', 'replace').encode('ascii', 'replace').\
                     decode('ascii', 'replace')
             l.append(s)
         # Same for unicode, but skip the unicode pass
-        elif isinstance(e, unicode):
+        elif isinstance(e, str):
             if safe_stdout:
                 s = e
             else:
@@ -69,9 +69,9 @@ def safe_print(*args):
             l.append(s)
         # Other types can be directly convert in unicode
         else:
-            l.append(unicode(e))
+            l.append(str(e))
     # Ok, now print it :)
-    print u' '.join(l)
+    print(' '.join(l))
 
 
 def split_semicolon(line, maxsplit=None):
@@ -125,11 +125,11 @@ def jsonify_r(obj):
         try:
             json.dumps(obj)
             return obj
-        except Exception, exp:
+        except Exception as exp:
             return None
-    properties = cls.properties.keys()
+    properties = list(cls.properties.keys())
     if hasattr(cls, 'running_properties'):
-        properties += cls.running_properties.keys()
+        properties += list(cls.running_properties.keys())
     for prop in properties:
         if not hasattr(obj, prop):
             continue
@@ -142,7 +142,7 @@ def jsonify_r(obj):
                 v = sorted(v)
             json.dumps(v)
             res[prop] = v
-        except Exception, exp:
+        except Exception as exp:
             if isinstance(v, list):
                 lst = []
                 for _t in v:
@@ -363,7 +363,7 @@ def expand_with_macros(ref, value):
 def get_obj_name(obj):
     # Maybe we do not have a real object but already a string. If so
     # return the string
-    if isinstance(obj, basestring):
+    if isinstance(obj, str):
         return obj
     return obj.get_name()
 
@@ -388,12 +388,12 @@ def get_obj_full_name(obj):
 # return the list of keys of the custom dict
 # but without the _ before
 def get_customs_keys(d):
-    return [k[1:] for k in d.keys()]
+    return [k[1:] for k in list(d.keys())]
 
 
 # return the values of the dict
 def get_customs_values(d):
-    return d.values()
+    return list(d.values())
 
 
 # Checks that a parameter has an unique value. If it's a list, the last
@@ -515,7 +515,7 @@ def got_generation_rule_pattern_change(xy_couples):
     if xy_couples == []:
         return []
     (x, y) = xy_cpl[0]
-    for i in xrange(x, y + 1):
+    for i in range(x, y + 1):
         n = got_generation_rule_pattern_change(xy_cpl[1:])
         if n != []:
             for e in n:

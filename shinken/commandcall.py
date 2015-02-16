@@ -34,13 +34,10 @@ class DummyCommandCall(object):
     pass
 
 
-class CommandCall(DummyCommandCall):
+class CommandCall(DummyCommandCall, metaclass=AutoSlots):
     """This class is use when a service, contact or host define
     a command with args.
     """
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
 
     # __slots__ = ('id', 'call', 'command', 'valid', 'args', 'poller_tag',
     #              'reactionner_tag', 'module_type', '__dict__')
@@ -134,11 +131,11 @@ class CommandCall(DummyCommandCall):
 
         # The command is a bit special, we just put it's name
         # or a '' if need
-        if self.command and not isinstance(self.command, basestring):
+        if self.command and not isinstance(self.command, str):
             res['command'] = self.command.get_name()
         # Maybe it's a repickle of a unpickle thing... (like with deepcopy). If so
         # only take the value
-        elif self.command and isinstance(self.command, basestring):
+        elif self.command and isinstance(self.command, str):
             res['command'] = self.command
         else:
             res['command'] = ''
@@ -167,5 +164,5 @@ class CommandCall(DummyCommandCall):
         'module_type': 'fork', 'command_name': u'notify-by-rss'})
         """
         for d in state:
-            for k, v in d.items():
+            for k, v in list(d.items()):
                 setattr(self, k, v)
