@@ -81,7 +81,7 @@ class TestTimeout(ShinkenTest):
         w.c = control_queue
         # Now we simulate the Worker's work() routine. We can't call it
         # as w.work() because it is an endless loop
-        for i in xrange(1, 10):
+        for i in range(1, 10):
             w.get_new_checks()
             # During the first loop the sleeping command is launched
             w.launch_new_checks()
@@ -113,7 +113,7 @@ class TestTimeout(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        print "Get the hosts and services"
+        print("Get the hosts and services")
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -122,12 +122,12 @@ class TestTimeout(ShinkenTest):
         router.checks_in_progress = []
         router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        print svc.checks_in_progress
+        print(svc.checks_in_progress)
         cs = svc.checks_in_progress
         self.assertEqual(1, len(cs))
         c = cs.pop()
-        print c
-        print c.timeout
+        print(c)
+        print(c.timeout)
         self.assertEqual(5, c.timeout)
 
 

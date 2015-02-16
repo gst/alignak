@@ -49,7 +49,7 @@ class TestAction(ShinkenTest):
                 return
             # 20s timeout
             if time.time() - start > 20:
-                print "COMMAND TIMEOUT AT 20s"
+                print("COMMAND TIMEOUT AT 20s")
                 return
 
 
@@ -69,7 +69,7 @@ class TestAction(ShinkenTest):
         self.wait_finished(a)
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
-        print a.output
+        print(a.output)
         self.assertEqual("Hi, I'm for testing only. Please do not use me directly, really", a.output)
         self.assertEqual("Hip=99% Bob=34mm", a.perf_data)
 
@@ -165,7 +165,7 @@ class TestAction(ShinkenTest):
 
         self.assertEqual('launched', a.status)
         self.wait_finished(a)
-        print "FUck", a.status, a.output
+        print("FUck", a.status, a.output)
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
 
@@ -181,7 +181,7 @@ class TestAction(ShinkenTest):
 
         self.assertEqual('launched', a.status)
         self.wait_finished(a)
-        print "FUck", a.status, a.output
+        print("FUck", a.status, a.output)
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
 
@@ -197,7 +197,7 @@ class TestAction(ShinkenTest):
 
         self.assertEqual('launched', a.status)
         self.wait_finished(a)
-        print "FUck", a.status, a.output
+        print("FUck", a.status, a.output)
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
 
@@ -213,7 +213,7 @@ class TestAction(ShinkenTest):
 
         self.wait_finished(a)
         self.assertEqual('done', a.status)
-        print "FUck", a.status, a.output
+        print("FUck", a.status, a.output)
         if sys.version_info < (2, 7):
             # cygwin: /bin/sh: -c: line 0: unexpected EOF while looking for matching'
             # ubuntu: /bin/sh: Syntax error: Unterminated quoted string
@@ -238,15 +238,15 @@ class TestAction(ShinkenTest):
             return
         else:
             a.command = r"""python -u -c 'print "A"*100000'"""
-        print "EXECUTE"
+        print("EXECUTE")
         a.execute()
-        print "EXECUTE FINISE"
+        print("EXECUTE FINISE")
         self.assertEqual('launched', a.status)
         # Give also the max output we want for the command
         self.wait_finished(a, 10000000000)
-        print "Status?", a.exit_status
+        print("Status?", a.exit_status)
         self.assertEqual(0, a.exit_status)
-        print "Output", len(a.output)
+        print("Output", len(a.output))
         self.assertEqual(0, a.exit_status)
         self.assertEqual('done', a.status)
         self.assertEqual("A"*100000, a.output)
@@ -260,12 +260,12 @@ class TestAction(ShinkenTest):
         a.timeout = 10
         a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
 
-        a.command = u"/bin/echo Wiadomo\u015b\u0107"
+        a.command = "/bin/echo Wiadomo\u015b\u0107"
 
         a.execute()
         self.wait_finished(a)
         #print a.output
-        self.assertEqual(a.output.decode('utf8'), u"Wiadomo\u015b\u0107")
+        self.assertEqual(a.output.decode('utf8'), "Wiadomo\u015b\u0107")
 
     def test_non_zero_exit_status_empty_output_but_non_empty_stderr(self):
         a = Action()

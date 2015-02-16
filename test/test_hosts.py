@@ -35,7 +35,7 @@ class TestHost(ShinkenTest):
     # Look if get_*_name return the good result
     def test_get_name(self):
         hst = self.get_hst()
-        print hst.get_dbg_name()
+        print(hst.get_dbg_name())
         self.assertEqual('test_host_0', hst.get_name())
         self.assertEqual('test_host_0', hst.get_dbg_name())
 
@@ -168,8 +168,8 @@ class TestHost(ShinkenTest):
         self.assertIn(h, r.childs)
         # and the reverse
         self.assertIn(r, h.parents)
-        print "r.childs", r.childs
-        print "h.childs", h.childs
+        print("r.childs", r.childs)
+        print("h.childs", h.childs)
 
         # And also in the parent/childs dep list
         self.assertIn(h, r.child_dependencies)

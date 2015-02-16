@@ -39,12 +39,12 @@ class TestObjectsAndNotifWays(ShinkenTest):
 
         b = c_normal.get_initial_status_brok()
         b.prepare()
-        print "B normal", b
-        self.assertEqual([u'd', u'u', u'r', u'f', u's'], b.data['host_notification_options'])
+        print("B normal", b)
+        self.assertEqual(['d', 'u', 'r', 'f', 's'], b.data['host_notification_options'])
         b2 = c_nw.get_initial_status_brok()
         b2.prepare()
-        print "B nw", b2
-        self.assertEqual([u''], b2.data['host_notification_options'])
+        print("B nw", b2)
+        self.assertEqual([''], b2.data['host_notification_options'])
 
 
 if __name__ == '__main__':

@@ -34,13 +34,13 @@ class TestConfig(ShinkenTest):
         
         
         sub_confs = self.conf.confs
-        print "NB SUB CONFS", len(sub_confs)
+        print("NB SUB CONFS", len(sub_confs))
         
         vcfg = None
         # Find where hr1 is
-        for cfg in sub_confs.values():
+        for cfg in list(sub_confs.values()):
             if 'HR1' in [h.get_name() for h in cfg.hosts]:
-                print 'FOUNCED', len(cfg.hosts)
+                print('FOUNCED', len(cfg.hosts))
                 vcfg = cfg
                 
 
@@ -49,7 +49,7 @@ class TestConfig(ShinkenTest):
         self.assert_(len(vhg.members) == 1)
         
         hr1 = [h for h in vcfg.hosts if h.get_name() == "HR1"][0]
-        print hr1.hostgroups
+        print(hr1.hostgroups)
         hg1 = None
         for hg in hr1.hostgroups:
             if hg.get_name() == 'everyone':
@@ -57,10 +57,10 @@ class TestConfig(ShinkenTest):
 
 
                 
-        print "Founded hostgroup", hg1
-        print 'There should be only one host there'
+        print("Founded hostgroup", hg1)
+        print('There should be only one host there')
         self.assert_(len(hg1.members) == 1)
-        print 'and should be the same than the vcfg one!'
+        print('and should be the same than the vcfg one!')
         self.assert_(hg1 == vhg)
 
 

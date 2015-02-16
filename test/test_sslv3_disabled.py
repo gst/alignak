@@ -24,7 +24,7 @@
 import subprocess
 from time import sleep
 
-import httplib
+import http.client
 import ssl
 try:
     import OpenSSL
@@ -67,7 +67,7 @@ class testSchedulerInit(ShinkenTest):
         ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv3)
         ctx.check_hostname=False
         ctx.verify_mode=ssl.CERT_NONE
-        self.conn = httplib.HTTPSConnection("localhost:9998",context=ctx)
+        self.conn = http.client.HTTPSConnection("localhost:9998",context=ctx)
         self.assertRaises(ssl.SSLError,self.conn.connect)
         try:
             self.conn.connect()
@@ -75,7 +75,7 @@ class testSchedulerInit(ShinkenTest):
             assert e.reason == 'SSLV3_ALERT_HANDSHAKE_FAILURE'
         sleep(2)
         pid = int(file("tmp/arbiterd.pid").read())
-        print ("KILLING %d" % pid)*50
+        print(("KILLING %d" % pid)*50)
         os.kill(int(file("tmp/arbiterd.pid").read()), 2)
         d.do_stop()
 

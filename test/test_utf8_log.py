@@ -37,9 +37,9 @@ class TestConfig(ShinkenTest):
     def test_utf8log(self):
         sutf = 'h\351h\351'  # Latin Small Letter E with acute in Latin-1
         logger.info(sutf)
-        sutf8 = u'I love myself $£¤'  # dollar, pound, currency
+        sutf8 = 'I love myself $£¤'  # dollar, pound, currency
         logger.info(sutf8)
-        s = unichr(40960) + u'abcd' + unichr(1972)
+        s = chr(40960) + 'abcd' + chr(1972)
         logger.info(s)
 
 

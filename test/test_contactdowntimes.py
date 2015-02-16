@@ -61,10 +61,10 @@ class TestContactDowntime(ShinkenTest):
         self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;STARTED')
         self.show_and_clear_logs()
 
-        print "downtime was scheduled. check its activity and the comment\n"*5
+        print("downtime was scheduled. check its activity and the comment\n"*5)
         self.assertEqual(1, len(self.sched.contact_downtimes))
         self.assertEqual(1, len(test_contact.downtimes))
-        self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
+        self.assertIn(test_contact.downtimes[0], list(self.sched.contact_downtimes.values()))
 
         self.assertTrue(test_contact.downtimes[0].is_in_effect)
         self.assertFalse(test_contact.downtimes[0].can_be_deleted)
@@ -89,12 +89,12 @@ class TestContactDowntime(ShinkenTest):
         self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;STOPPED')
         self.show_and_clear_logs()
 
-        print "\n\nDowntime was ended. Check it is really stopped"
+        print("\n\nDowntime was ended. Check it is really stopped")
         self.assertEqual(0, len(self.sched.contact_downtimes))
         self.assertEqual(0, len(test_contact.downtimes))
 
-        for n in svc.notifications_in_progress.values():
-            print "NOTIF", n, n.t_to_go, time.time()
+        for n in list(svc.notifications_in_progress.values()):
+            print("NOTIF", n, n.t_to_go, time.time())
 
         # Now we want this contact to be really notify!
         # Ok, we define the downtime like we should, now look at if it does the job: do not
@@ -104,8 +104,8 @@ class TestContactDowntime(ShinkenTest):
         self.assert_any_log_match('SERVICE NOTIFICATION.*;CRITICAL')
         self.show_and_clear_logs()
 
-        for n in svc.notifications_in_progress.values():
-            print "NOTIF", n, n.t_to_go, time.time(), time.time() - n.t_to_go
+        for n in list(svc.notifications_in_progress.values()):
+            print("NOTIF", n, n.t_to_go, time.time(), time.time() - n.t_to_go)
 
 
     def test_contact_downtime_and_cancel(self):
@@ -142,10 +142,10 @@ class TestContactDowntime(ShinkenTest):
         self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;STARTED')
         self.show_and_clear_logs()
 
-        print "downtime was scheduled. check its activity and the comment"
+        print("downtime was scheduled. check its activity and the comment")
         self.assertEqual(1, len(self.sched.contact_downtimes))
         self.assertEqual(1, len(test_contact.downtimes))
-        self.assertIn(test_contact.downtimes[0], self.sched.contact_downtimes.values())
+        self.assertIn(test_contact.downtimes[0], list(self.sched.contact_downtimes.values()))
 
         self.assertTrue(test_contact.downtimes[0].is_in_effect)
         self.assertFalse(test_contact.downtimes[0].can_be_deleted)
@@ -174,7 +174,7 @@ class TestContactDowntime(ShinkenTest):
         self.assert_any_log_match('CONTACT DOWNTIME ALERT.*;CANCELLED')
         self.show_and_clear_logs()
 
-        print "Downtime was cancelled"
+        print("Downtime was cancelled")
         self.assertEqual(0, len(self.sched.contact_downtimes))
         self.assertEqual(0, len(test_contact.downtimes))
 

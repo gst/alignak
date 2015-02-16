@@ -26,8 +26,8 @@ Test shinken.logging
 import sys
 import os
 import time
-import cPickle
-from cStringIO import StringIO
+import pickle
+from io import StringIO
 
 from tempfile import NamedTemporaryFile
 
@@ -117,8 +117,8 @@ class LogCollectMixin:
         for obj in collector.list:
             self.assertIsInstance(obj, Brok)
             self.assertEqual(obj.type, 'log')
-            data = cPickle.loads(obj.data)
-            self.assertEqual(data.keys(), ['log'])
+            data = pickle.loads(obj.data)
+            self.assertEqual(list(data.keys()), ['log'])
             yield data['log']
 
     def _prepare_logging(self):

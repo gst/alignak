@@ -131,10 +131,10 @@ class TestParsePerfdata(ShinkenTest):
         self.assertEqual(0, m.min)
         self.assertIs(None, m.max)
 
-        s = u"ééé-192.168.0.1=-7.22636468709e-05s;1;2;0;;"
+        s = "ééé-192.168.0.1=-7.22636468709e-05s;1;2;0;;"
         p = PerfDatas(s)
-        m = p[u'ééé-192.168.0.1']
-        self.assertEqual(m.name, u'ééé-192.168.0.1')
+        m = p['ééé-192.168.0.1']
+        self.assertEqual(m.name, 'ééé-192.168.0.1')
         self.assertEqual(m.value, -7.22636468709e-05)
         self.assertEqual(m.uom, 's')
         self.assertEqual(m.warning, 1)

@@ -95,9 +95,9 @@ def safe_print(*args, **kw):
     if kw:
         raise ValueError('unhandled named/keyword argument(s): %r' % kw)
     #
-    make_in_data_gen = lambda: ( a if isinstance(a, unicode)
+    make_in_data_gen = lambda: ( a if isinstance(a, str)
                                 else
-                            unicode(str(a), in_bytes_encoding, 'replace')
+                            str(str(a), in_bytes_encoding, 'replace')
                         for a in args )
 
     possible_codings = ( out_encoding, )
@@ -105,7 +105,7 @@ def safe_print(*args, **kw):
         possible_codings += ( 'ascii', )
 
     for coding in possible_codings:
-        data = u' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
+        data = ' '.join(make_in_data_gen()).encode(coding, 'xmlcharrefreplace')
         try:
             sys.stdout.write(data)
             break
@@ -219,7 +219,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
         if not self.conf.conf_is_correct:
-            print "The conf is not correct, I stop here"
+            print("The conf is not correct, I stop here")
             self.conf.dump()
             return
         self.conf.clean()
@@ -293,7 +293,7 @@ class ShinkenTest(unittest.TestCase):
             obj.checks_in_progress = []
         for loop in range(1, count + 1):
             if verbose is True:
-                print "processing check", loop
+                print("processing check", loop)
             for ref in reflist:
                 (obj, exit_status, output) = ref
                 obj.update_in_checking()
@@ -336,35 +336,35 @@ class ShinkenTest(unittest.TestCase):
 
 
     def show_logs(self):
-        print "--- logs <<<----------------------------------"
+        print("--- logs <<<----------------------------------")
         if hasattr(self, "sched"):
             broks = self.sched.broks
         else:
             broks = self.broks
-        for brok in sorted(broks.values(), lambda x, y: x.id - y.id):
+        for brok in sorted(list(broks.values()), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 brok.prepare()
                 safe_print("LOG: ", brok.data['log'])
 
-        print "--- logs >>>----------------------------------"
+        print("--- logs >>>----------------------------------")
 
 
     def show_actions(self):
-        print "--- actions <<<----------------------------------"
+        print("--- actions <<<----------------------------------")
         if hasattr(self, "sched"):
             actions = self.sched.actions
         else:
             actions = self.actions
-        for a in sorted(actions.values(), lambda x, y: x.id - y.id):
+        for a in sorted(list(actions.values()), lambda x, y: x.id - y.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
                 else:
                     ref = "host: %s svc: %s" % (a.ref.host.get_name(), a.ref.get_name())
-                print "NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status)
+                print("NOTIFICATION %d %s %s %s %s" % (a.id, ref, a.type, time.asctime(time.localtime(a.t_to_go)), a.status))
             elif a.is_a == 'eventhandler':
-                print "EVENTHANDLER:", a
-        print "--- actions >>>----------------------------------"
+                print("EVENTHANDLER:", a)
+        print("--- actions >>>----------------------------------")
 
 
     def show_and_clear_logs(self):
@@ -382,7 +382,7 @@ class ShinkenTest(unittest.TestCase):
             broks = self.sched.broks
         else:
             broks = self.broks
-        return len([b for b in broks.values() if b.type == 'log'])
+        return len([b for b in list(broks.values()) if b.type == 'log'])
 
 
     def count_actions(self):
@@ -390,7 +390,7 @@ class ShinkenTest(unittest.TestCase):
             actions = self.sched.actions
         else:
             actions = self.actions
-        return len(actions.values())
+        return len(list(actions.values()))
 
 
     def clear_logs(self):
@@ -399,7 +399,7 @@ class ShinkenTest(unittest.TestCase):
         else:
             broks = self.broks
         id_to_del = []
-        for b in broks.values():
+        for b in list(broks.values()):
             if b.type == 'log':
                 id_to_del.append(b.id)
         for id in id_to_del:
@@ -419,7 +419,7 @@ class ShinkenTest(unittest.TestCase):
             self.assertGreaterEqual(self.count_logs(), index)
         regex = re.compile(pattern)
         lognum = 1
-        broks = sorted(self.sched.broks.values(), lambda x, y: x.id - y.id)
+        broks = sorted(list(self.sched.broks.values()), lambda x, y: x.id - y.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
@@ -438,7 +438,7 @@ class ShinkenTest(unittest.TestCase):
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
         broks = getattr(self, 'sched', self).broks
-        broks = sorted(broks.values(), lambda x, y: x.id - y.id)
+        broks = sorted(list(broks.values()), lambda x, y: x.id - y.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
@@ -463,16 +463,16 @@ class ShinkenTest(unittest.TestCase):
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
         res = []
-        for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
+        for brok in sorted(list(self.sched.broks.values()), lambda x, y: x.id - y.id):
             if brok.type == 'log':
                 if re.search(regex, brok.data['log']):
                     res.append(brok.data['log'])
         return res
 
     def print_header(self):
-        print "\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#"
-        print "#" + string.center(self.id(), 78) + "#"
-        print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
+        print("\n" + "#" * 80 + "\n" + "#" + " " * 78 + "#")
+        print("#" + string.center(self.id(), 78) + "#")
+        print("#" + " " * 78 + "#\n" + "#" * 80 + "\n")
 
     def xtest_conf_is_correct(self):
         self.print_header()

@@ -110,7 +110,7 @@ class testSchedulerInit(ShinkenTest):
         # "Clean" shutdown
         sleep(2)
         pid = int(file("tmp/arbiterd.pid").read())
-        print ("KILLING %d" % pid)*50
+        print(("KILLING %d" % pid)*50)
         os.kill(int(file("tmp/arbiterd.pid").read()), 2)
         d.do_stop()
 

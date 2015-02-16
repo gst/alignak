@@ -15,7 +15,7 @@ def get_instance(plugin):
 class ThisModule(BaseModule):
     pass
 
-import helpers
+from . import helpers
 
 expected_helpers_X = 'B'
 

@@ -41,9 +41,9 @@ class TestReversedList(ShinkenTest):
         sg = self.sched.servicegroups.find_by_name('servicegroup_01')
         assert(prev_id != sg.id)
 
-        for sname in [u'servicegroup_01', u'ok', u'flap', u'unknown', u'random',
-                      u'servicegroup_02', u'servicegroup_03', u'warning', u'critical',
-                      u'servicegroup_04', u'servicegroup_05', u'pending', u'mynewgroup']:
+        for sname in ['servicegroup_01', 'ok', 'flap', 'unknown', 'random',
+                      'servicegroup_02', 'servicegroup_03', 'warning', 'critical',
+                      'servicegroup_04', 'servicegroup_05', 'pending', 'mynewgroup']:
             sg = self.sched.servicegroups.find_by_name(sname)
             assert(sname is not None)
 

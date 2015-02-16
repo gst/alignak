@@ -18,7 +18,7 @@ class ThisModule(BaseModule):
 
 
 
-import helpers
+from . import helpers
 
 expected_helpers_X = 'A'
 
