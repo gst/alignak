@@ -765,7 +765,7 @@ class SchedulingItem(Item):
 
         # Protect against bad type output
         # if str, go in unicode
-        if isinstance(c.output, str):
+        if isinstance(c.output, bytes):
             c.output = c.output.decode('utf8', 'ignore')
             c.long_output = c.long_output.decode('utf8', 'ignore')
 
@@ -774,11 +774,11 @@ class SchedulingItem(Item):
         # migration from old shinken version, that got output as str
         # and not unicode
         # if str, go in unicode
-        if isinstance(self.output, str):
+        if isinstance(self.output, bytes):
             self.output = self.output.decode('utf8', 'ignore')
             self.long_output = self.long_output.decode('utf8', 'ignore')
 
-        if isinstance(c.perf_data, str):
+        if isinstance(c.perf_data, bytes):
             c.perf_data = c.perf_data.decode('utf8', 'ignore')
 
         # We check for stalking if necessary
