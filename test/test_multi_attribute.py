@@ -46,9 +46,9 @@ class TestMultiVuledAttributes(ShinkenTest):
         self.assertEqual(3, srv1.max_check_attempts)
 
         # list parameter (all items should appear in the order they are defined)
-        self.assertEqual(['d', 'f', '1', 's', 'r', 'u'], list(set(hst1.notification_options)))
+        self.assertEqual(['1', 'd', 'f', 'r', 's', 'u'], sorted(list(set(hst1.notification_options))))
 
-        self.assertEqual(['c', 'f', '1', 's', 'r', 'u', 'w'], list(set(srv1.notification_options)))
+        self.assertEqual(['1', 'c', 'f', 'r', 's', 'u', 'w'], sorted(list(set(srv1.notification_options))))
 
 
 
