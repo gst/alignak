@@ -45,13 +45,13 @@ def main():
     pmemUsage = 100 - percentFreeMem()
 
     if pmemUsage >= critical:
-        print ('CRITICAL - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
+        print(('CRITICAL - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage)))
         raise SystemExit(2)
     elif pmemUsage >= warning:
-        print ('WARNING - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
+        print(('WARNING - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage)))
         raise SystemExit(1)
     else:
-        print ('OK - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
+        print(('OK - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage)))
         raise SystemExit(0)
 
 if __name__ == "__main__":

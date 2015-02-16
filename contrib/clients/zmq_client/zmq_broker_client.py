@@ -74,7 +74,7 @@ print("Listening for shinken notifications.")
 # Process incoming messages
 while True:
 	topic = s_sub.recv()
-	print("Got msg on topic: " + topic)
+	print(("Got msg on topic: " + topic))
 	data = s_sub.recv()
 	if method == "json":
 		json_data = json.loads(data)
