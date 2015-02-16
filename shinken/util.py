@@ -55,9 +55,10 @@ def safe_print(*args):
         # utf8, go in ascii mode
         if isinstance(e, str):
             if safe_stdout:
-                s = str(e, 'utf8', errors='ignore')
+                s = e
+                #s = str(e, 'utf8', errors='ignore')
             else:
-                s = e.decode('ascii', 'replace').encode('ascii', 'replace').\
+                s = e.encode('ascii', 'replace').\
                     decode('ascii', 'replace')
             l.append(s)
         # Same for unicode, but skip the unicode pass
