@@ -867,7 +867,7 @@ class Config(Item):
                 continue
 
             for line in buf:
-                line = line.decode('utf8', 'replace')
+                line = line  #.decode('utf8', 'replace')
                 res.write(line)
                 if line.endswith('\n'):
                     line = line[:-1]
@@ -884,7 +884,7 @@ class Config(Item):
                         if self.read_config_silent == 0:
                             logger.info("Processing object config file '%s'", cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
-                        res.write(fd.read().decode('utf8', 'replace'))
+                        res.write(fd.read() ) #.decode('utf8', 'replace'))
                         # Be sure to add a line return so we won't mix files
                         res.write(os.linesep)
                         fd.close()
@@ -918,7 +918,7 @@ class Config(Item):
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' %
                                               (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
-                                    res.write(fd.read().decode('utf8', 'replace'))
+                                    res.write(fd.read())
                                     # Be sure to separate files data
                                     res.write(os.linesep)
                                     fd.close()
@@ -2431,7 +2431,7 @@ class Config(Item):
                 indent=4,
                 separators=(',', ': '),
                 sort_keys=True
-            )
+            ).encode()
         )
         if close is True:
             f.close()
