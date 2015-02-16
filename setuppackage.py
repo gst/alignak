@@ -38,7 +38,7 @@ if python_version < (2, 6):
 from glob import glob
 import os
 import itertools
-import ConfigParser
+import configparser
 try:
     import pwd
     import grp
@@ -70,7 +70,7 @@ from distutils.command.build import build as _build
 # We try to see if we are in a full install or an update process
 is_update = False
 if 'update' in sys.argv or '--upgrade' in sys.argv:
-    print "Shinken Lib Updating process only"
+    print("Shinken Lib Updating process only")
     sys.argv.remove('update')
     sys.argv.insert(1, 'install')
     is_update = True
@@ -424,7 +424,7 @@ class install_config(Command):
     def get_uid(user_name):
         try:
             return pwd.getpwnam(user_name)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             raise DistutilsOptionError("The user %s is unknown. "
                                        "Maybe you should create this user"
                                        % user_name)
@@ -434,7 +434,7 @@ class install_config(Command):
     def get_gid(group_name):
         try:
             return grp.getgrnam(group_name)[2]
-        except KeyError, exp:
+        except KeyError as exp:
             raise DistutilsOptionError("The group %s is unknown. "
                                        "Maybe you should create this group"
                                        % group_name)
@@ -688,4 +688,4 @@ if __name__ == "__main__":
         data_files=data_files,
     )
 
-print "Shinken setup done"
+print("Shinken setup done")
