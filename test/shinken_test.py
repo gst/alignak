@@ -341,7 +341,7 @@ class ShinkenTest(unittest.TestCase):
             broks = self.sched.broks
         else:
             broks = self.broks
-        for brok in sorted(list(broks.values()), lambda x, y: x.id - y.id):
+        for brok in sorted(list(broks.values()), key=lambda x: x.id):
             if brok.type == 'log':
                 brok.prepare()
                 safe_print("LOG: ", brok.data['log'])
@@ -355,7 +355,7 @@ class ShinkenTest(unittest.TestCase):
             actions = self.sched.actions
         else:
             actions = self.actions
-        for a in sorted(list(actions.values()), lambda x, y: x.id - y.id):
+        for a in sorted(list(actions.values()), key=lambda x: x.id):
             if a.is_a == 'notification':
                 if a.ref.my_type == "host":
                     ref = "host: %s" % a.ref.get_name()
@@ -419,7 +419,7 @@ class ShinkenTest(unittest.TestCase):
             self.assertGreaterEqual(self.count_logs(), index)
         regex = re.compile(pattern)
         lognum = 1
-        broks = sorted(list(self.sched.broks.values()), lambda x, y: x.id - y.id)
+        broks = sorted(list(self.sched.broks.values()), key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
@@ -438,7 +438,7 @@ class ShinkenTest(unittest.TestCase):
     def _any_log_match(self, pattern, assert_not):
         regex = re.compile(pattern)
         broks = getattr(self, 'sched', self).broks
-        broks = sorted(list(broks.values()), lambda x, y: x.id - y.id)
+        broks = sorted(list(broks.values()), key=lambda x: x.id)
         for brok in broks:
             if brok.type == 'log':
                 brok.prepare()
@@ -463,7 +463,7 @@ class ShinkenTest(unittest.TestCase):
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
         res = []
-        for brok in sorted(list(self.sched.broks.values()), lambda x, y: x.id - y.id):
+        for brok in sorted(list(self.sched.broks.values()), key=lambda x: x.id):
             if brok.type == 'log':
                 if re.search(regex, brok.data['log']):
                     res.append(brok.data['log'])
