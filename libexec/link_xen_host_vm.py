@@ -71,8 +71,8 @@ def write_output(path,r):
         f.write(buf)
         f.close()
         shutil.move(path + '.tmp', path)
-        print "File %s wrote" % path
-    except IOError, exp:
+        print("File %s wrote" % path)
+    except IOError as exp:
         sys.exit("Error writing the file %s: %s" % (path, exp))
 
 def con_poolmaster(xs, user, password):
@@ -80,17 +80,17 @@ def con_poolmaster(xs, user, password):
     s = XenAPI.Session("http://%s" % xs)
     s.xenapi.login_with_password(user,password)
     return s
-  except XenAPI.Failure, msg:
+  except XenAPI.Failure as msg:
      if  msg.details[0] == "HOST_IS_SLAVE":
         host = msg.details[1]
         s = XenAPI.Session("http://%s" % host)
         s.xenapi.login_with_password(user, password)
         return s
      else:
-        print "Error: pool con:",  xs, sys.exc_info()[0]
+        print("Error: pool con:",  xs, sys.exc_info()[0])
         pass
   except Exception:
-    print "Error: pool con:",  xs, sys.exc_info()[0]
+    print("Error: pool con:",  xs, sys.exc_info()[0])
     pass
   return None
 
@@ -107,7 +107,7 @@ def main(output, user, password, rules, xenserver):
           if vhost != "OpaqueRef:NULL":
             host = s.xenapi.host.get_hostname(vhost)
             vm_name = s.xenapi.VM.get_name_label(vm)
-            if host in res.keys():
+            if host in list(res.keys()):
               res[host].append(vm_name)
             else:
               res[host] = [vm_name]
@@ -115,10 +115,10 @@ def main(output, user, password, rules, xenserver):
     except Exception:
       pass
   r = create_all_links(res,rules)
-  print "Created %d links" % len(r)
+  print("Created %d links" % len(r))
 
   write_output(output, r)
-  print "Finished!"
+  print("Finished!")
 
 if __name__ == "__main__":
     # Manage the options

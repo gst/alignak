@@ -86,12 +86,12 @@ else:
 if args:
     targets.extend(args)
 
-print "Got our target", targets
+print("Got our target", targets)
 
 
 def debug(txt):
     if verbose:
-        print txt
+        print(txt)
 
 
 # Says if a host is up or not
@@ -187,12 +187,12 @@ class DetectedHost:
 
         # now get the entry with the max value, the first one
         for (os, osgen, accuracy, os_type, vendor) in self.os_possibilities:
-            print "Can be", (os, osgen, accuracy, os_type, vendor)
+            print("Can be", (os, osgen, accuracy, os_type, vendor))
             if accuracy == max_accuracy:
                 self.os = (os, osgen, os_type, vendor)
                 break
 
-        print "Will dump", self.os
+        print("Will dump", self.os)
 
         # Ok, unknown os... not good
         if self.os == ('', '', '', ''):
@@ -258,31 +258,31 @@ class DetectedHost:
 if not simulate:
     (_, tmppath) = tempfile.mkstemp()
 
-    print "propose a tmppath", tmppath
+    print("propose a tmppath", tmppath)
 
     # Fred : command launched depending on os detection
     # cmd = "nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O -oX %s" % (' '.join(targets), min_rate, max_retries, tmppath)
     cmd = DEFAULT_CMD % (' '.join(targets), min_rate, max_retries, tmppath)
-    print "Launching command,", cmd
+    print("Launching command,", cmd)
     try:
         nmap_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             close_fds=False, shell=True)
-    except OSError, exp:
-        print "Debug: Error in launching command:", cmd, exp
+    except OSError as exp:
+        print("Debug: Error in launching command:", cmd, exp)
         sys.exit(2)
 
-    print "Try to communicate"
+    print("Try to communicate")
     (stdoutdata, stderrdata) = nmap_process.communicate()
 
     if nmap_process.returncode != 0:
-        print "Error: the nmap return an error: '%s'" % stderrdata
+        print("Error: the nmap return an error: '%s'" % stderrdata)
         sys.exit(2)
 
     # Fred : no need to print nmap result catched ...
     # print "Got it", (stdoutdata, stderrdata)
-    print "Got it !"
+    print("Got it !")
 
     xml_input = tmppath
 else:  # simulate mode
@@ -291,8 +291,8 @@ else:  # simulate mode
 tree = ElementTree()
 try:
     tree.parse(xml_input)
-except IOError, exp:
-    print "Error opening file '%s': %s" % (xml_input, exp)
+except IOError as exp:
+    print("Error opening file '%s': %s" % (xml_input, exp))
     sys.exit(2)
 
 hosts = tree.findall('host')
@@ -424,7 +424,7 @@ for h in all_hosts:
     #print "Service config"
     #print c.get_cfg_for_services()
     #print c.__dict__
-    print '\n'.join(h.get_discovery_output())
+    print('\n'.join(h.get_discovery_output()))
     #print "\n\n\n"
 
 

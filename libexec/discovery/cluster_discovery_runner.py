@@ -119,10 +119,10 @@ def get_cluster_discovery_output(list):
     if list :
         for elt in list:
             names.append(elt)
-        print "%s::%s=1"%(hostname, clSolution)# To add tag
-        print "%s::_%s_modules=%s"%(hostname, clSolution, ','.join(names))# Host macros by Safekit modules
+        print("%s::%s=1"%(hostname, clSolution))# To add tag
+        print("%s::_%s_modules=%s"%(hostname, clSolution, ','.join(names)))# Host macros by Safekit modules
     else : 
-        print "%s::%s=0"%(hostname, clSolution)# No cluster detected
+        print("%s::%s=0"%(hostname, clSolution))# No cluster detected
 
 ###############
 #  execution  #
