@@ -237,7 +237,7 @@ class TestAction(ShinkenTest):
             # FROM NOW IT4S FAIL ON WINDOWS :(
             return
         else:
-            a.command = r"""python -u -c 'print "A"*100000'"""
+            a.command = r"""python -u -c 'print("A"*100000)'"""
         print("EXECUTE")
         a.execute()
         print("EXECUTE FINISE")
