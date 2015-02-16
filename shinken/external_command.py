@@ -1540,8 +1540,8 @@ class ExternalCommandManager:
         if self.conf.log_passive_checks:
             naglog_result(
                 'info', 'PASSIVE HOST CHECK: %s;%d;%s'
-                % (host.get_name().decode('utf8', 'ignore'),
-                   status_code, plugin_output.decode('utf8', 'ignore'))
+                % (host.get_name(),
+                   status_code, plugin_output)
             )
         now = time.time()
         cls = host.__class__
@@ -1580,9 +1580,9 @@ class ExternalCommandManager:
         # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
             naglog_result('info', 'PASSIVE SERVICE CHECK: %s;%s;%d;%s'
-                          % (service.host.get_name().decode('utf8', 'ignore'),
-                             service.get_name().decode('utf8', 'ignore'),
-                             return_code, plugin_output.decode('utf8', 'ignore')))
+                          % (service.host.get_name(),
+                             service.get_name(),
+                             return_code, plugin_output))
         now = time.time()
         cls = service.__class__
         # If globally disable OR locally, do not launch
