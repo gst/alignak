@@ -32,7 +32,7 @@ class DB(object):
     def stringify(self, val):
         """Get a unicode from a value"""
         # If raw string, go in unicode
-        if isinstance(val, str):
+        if isinstance(val, bytes):
             val = val.decode('utf8', 'ignore').replace("'", "''")
         elif isinstance(val, str):
             val = val.replace("'", "''")
