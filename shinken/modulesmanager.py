@@ -94,7 +94,8 @@ class ModulesManager(object):
             mod_file = abspath(join(self.modules_path, mod_name, 'module.py'))
 
             try:
-                mod = importlib.import_module('.module', mod_name)
+                #mod = importlib.import_module('.module', mod_name)
+                mod = importlib.import_module('%s.module' % mod_name)
             except Exception as err:
                 logger.warning('Cannot load %s as a package (%s), trying as module..',
                                mod_name, err)
