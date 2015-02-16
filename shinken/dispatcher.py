@@ -324,7 +324,7 @@ class Dispatcher:
 
         # Now we sort the scheds so we take master, then spare
         # the dead, but we do not care about them
-        scheds.sort(alive_then_spare_then_deads)
+        scheds.sort(key=alive_then_spare_then_deads)
         scheds.reverse()  # pop is last, I need first
 
         print_sched = [s.get_name() for s in scheds]
@@ -491,7 +491,7 @@ class Dispatcher:
                             satellites = []
                             for satellite in r.get_potential_satellites_by_type(kind):
                                 satellites.append(satellite)
-                            satellites.sort(alive_then_spare_then_deads)
+                            satellites.sort(key=alive_then_spare_then_deads)
 
                             # Only keep alive Satellites and reachable ones
                             satellites = [s for s in satellites if s.alive and s.reachable]
