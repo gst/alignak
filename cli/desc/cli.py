@@ -36,30 +36,30 @@ CONFIG = None
 def serve(port):
     port = int(port)
     logger.info("Serving documentation at port %s", port)
-    import SimpleHTTPServer
-    import SocketServer
+    import http.server
+    import socketserver
     doc_dir   = CONFIG['paths']['doc']
     html_dir  = os.path.join(doc_dir, 'build', 'html')
     os.chdir(html_dir)
     try:
-        Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        httpd = SocketServer.TCPServer(("", port), Handler)
+        Handler = http.server.SimpleHTTPRequestHandler
+        httpd = socketserver.TCPServer(("", port), Handler)
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
-    except Exception, exp:
+    except Exception as exp:
         logger.error(exp)
 
 def do_desc(cls='host'):
     properties = Host.properties
-    prop_names = properties.keys()
+    prop_names = list(properties.keys())
     prop_names.sort()
     for k in prop_names:
         v = properties[k]
         if v.has_default:
-            print k, '(%s)' % v.default
+            print(k, '(%s)' % v.default)
         else:
-            print k
+            print(k)
 
 
 

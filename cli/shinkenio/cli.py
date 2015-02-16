@@ -29,9 +29,9 @@ import stat
 import json
 import tempfile
 import tarfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import shutil
-from StringIO import StringIO
+from io import StringIO
 from shinken.log import logger, cprint
 
 # Will be populated by the shinken CLI command
@@ -47,7 +47,7 @@ def read_package_json(fd):
     buf = buf.decode('utf8', 'ignore')
     try:
         package_json = json.loads(buf)
-    except ValueError, exp:
+    except ValueError as exp:
         logger.error("Bad package.json file : %s", exp)
         sys.exit(2)
     if not package_json:
@@ -121,7 +121,7 @@ def publish_archive(archive):
     c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         sys.exit(2)
         return
@@ -164,13 +164,13 @@ def search(look_at):
         c.setopt(c.PROXY, proxy)
 
     args = {'keywords':','.join(look_at)}
-    c.setopt(c.URL, str('shinken.io/searchcli?'+urllib.urlencode(args)))
+    c.setopt(c.URL, str('shinken.io/searchcli?'+urllib.parse.urlencode(args)))
     response = StringIO()
     c.setopt(pycurl.WRITEFUNCTION, response.write)
     #c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         return
 
@@ -247,7 +247,7 @@ def inventor(look_at):
     for d in os.listdir(inventory):
         if os.path.exists(os.path.join(inventory, d, 'package.json')):
             if not look_at or d in look_at:
-                print d
+                print(d)
             # If asked, dump the content.package content
             if look_at or d in look_at:
                 content_p = os.path.join(inventory, d, 'content.json')
@@ -256,7 +256,7 @@ def inventor(look_at):
                     continue
                 try:
                     j = json.loads(open(content_p, 'r').read())
-                except Exception, exp:
+                except Exception as exp:
                     logger.error('Bad %s file "%s"', content_p, exp)
                     continue
                 for d in j:
@@ -266,7 +266,7 @@ def inventor(look_at):
                     else:
                         s += '(f)'
                     s += d['name']
-                    print s
+                    print(s)
 
 
 def do_inventory(*look_at):
@@ -328,7 +328,7 @@ def grab_package(pname):
     #c.setopt(c.VERBOSE, 1)
     try:
         c.perform()
-    except pycurl.error, exp:
+    except pycurl.error as exp:
         logger.error("There was a critical error : %s", exp)
         sys.exit(2)
         return ''
@@ -575,7 +575,7 @@ def do_install(pname, local, download_only):
             f.write(raw)
             f.close()
             cprint('Download OK: %s' %  tmpf, 'green')
-        except Exception, exp:
+        except Exception as exp:
             logger.error("Package save fail: %s", exp)
             sys.exit(2)
         return

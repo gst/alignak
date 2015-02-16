@@ -35,18 +35,18 @@ CONFIG = None
 def serve(port):
     port = int(port)
     logger.info("Serving documentation at port %s", port)
-    import SimpleHTTPServer
-    import SocketServer
+    import http.server
+    import socketserver
     doc_dir   = CONFIG['paths']['doc']
     html_dir  = os.path.join(doc_dir, 'build', 'html')
     os.chdir(html_dir)
     try:
-        Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        httpd = SocketServer.TCPServer(("", port), Handler)
+        Handler = http.server.SimpleHTTPRequestHandler
+        httpd = socketserver.TCPServer(("", port), Handler)
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
-    except Exception, exp:
+    except Exception as exp:
         logger.error(exp)
 
 def do_serve(port='8080'):
@@ -74,7 +74,7 @@ def _compile():
         s = 'sphinx-build -b html -d %s %s %s' % (doctrees_dir, source_dir, html_dir)
         args = s.split(' ')
         main(args)
-    except Exception, exp:
+    except Exception as exp:
         logger.error(exp)
     return
 
