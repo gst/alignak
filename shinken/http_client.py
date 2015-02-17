@@ -133,6 +133,42 @@ class HTTPClient(object):
             # print "GOT RAW RESULT", ret, type(ret)
             return ret
 
+    def post_raw(self, path, data_args):
+        c = self.con
+        c.setopt(pycurl.HTTPGET, 0)
+        c.setopt(c.POST, 1)
+
+        c.setopt(c.TIMEOUT, self.data_timeout)
+
+        #postargs = [(k, v) for (k, v) in data_args.iteritems()]
+        c.setopt(c.HTTPPOST, data_args)
+        c.setopt(c.URL, str(self.uri + path))
+        # Ok now manage the response
+        response = StringIO()
+        c.setopt(pycurl.WRITEFUNCTION, response.write)
+        # c.setopt(c.VERBOSE, 1)
+        try:
+            c.perform()
+        except pycurl.error as error:
+            errno, errstr = error
+            raise HTTPException('Connexion error to %s : %s' % (self.uri, errstr))
+
+        r = c.getinfo(pycurl.HTTP_CODE)
+        # Do NOT close the connexion
+        # c.close()
+        if r != 200:
+            err = response.getvalue()
+            logger.error("There was a critical error : %s", err)
+            raise Exception('Connexion error to %s : %s' % (self.uri, r))
+        else:
+            # Manage special return of pycurl
+            # ret  = json.loads(response.getvalue().replace('\\/', '/'))
+            ret = response.getvalue()
+            return ret
+
+        # Should return us pong string
+        return ret
+
     # Try to get an URI path
     def post(self, path, args, wait='short'):
         size = 0
