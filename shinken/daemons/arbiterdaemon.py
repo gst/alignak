@@ -76,7 +76,6 @@ class IForArbiter(Interface):
         logger.info('%s > Got new conf: size=%s',
                     threading.currentThread().ident, sys.getsizeof(conf))
 
-        conf = cPickle.loads(conf)
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
     put_conf.method = 'POST'
@@ -637,10 +636,13 @@ class Arbiter(Daemon):
 
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
+        conf = self.new_conf
+        if not conf:
+            return
         old_conf = self.cur_conf
         if old_conf:
             old_conf.release()
-        conf = self.new_conf
+        conf = cPickle.loads(conf)
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf
