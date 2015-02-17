@@ -626,6 +626,9 @@ class Arbiter(Daemon):
 
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
+        old_conf = self.cur_conf
+        if old_conf:
+            old_conf.release()
         conf = self.new_conf
         self.new_conf = None
         self.cur_conf = conf

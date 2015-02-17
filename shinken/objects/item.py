@@ -153,6 +153,13 @@ class Item(object):
             else:
                 setattr(self, key, val)
 
+    def release(self):
+        for attr in dir(self):
+            if not attr.startswith('__'):
+                try:
+                    delattr(self, attr)
+                except AttributeError:
+                    pass
 
     # When values to set on attributes are unique (single element list),
     # return the value directly rather than setting list element.
@@ -719,6 +726,13 @@ class Items(object):
         self.configuration_warnings = []
         self.configuration_errors = []
         self.add_items(items, index_items)
+
+    def release(self):
+        for item in self.items.itervalues():
+            item.release()
+        self.items.clear()
+        self.name_to_item.clear()
+        self.name_to_template.clear()
 
     def get_source(self, item):
         source = getattr(item, 'imported_from', None)
