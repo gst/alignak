@@ -26,6 +26,7 @@ import sys
 import os
 import time
 import traceback
+import threading
 from Queue import Empty
 import socket
 import traceback
@@ -71,6 +72,10 @@ class IForArbiter(Interface):
     doc = 'Put a new configuration to the daemon'
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf):
+
+        logger.info('%s > Got new conf: size=%s',
+                    threading.currentThread().ident, sys.getsizeof(conf))
+
         conf = cPickle.loads(conf)
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
