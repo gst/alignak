@@ -61,6 +61,12 @@ class IForArbiter(Interface):
             return False
     have_conf.doc = doc
 
+    def gc(self):
+        import gc
+        logger.info('%s : GC ..', threading.currentThread().ident)
+        res = gc.collect()
+        logger.info('Done: %r', res)
+        return 'ok'
 
     doc = 'Put a new configuration to the daemon'
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
