@@ -307,7 +307,7 @@ class Simple(object):
         print_mem("after decompress: len(data) = %s" % len(data))
         if True:
             data = cPickle.loads(data)
-            print_mem("after unpickle: conf = %s" % data)
+            print_mem("after unpickle")
         method = self.httpdaemon.registered_fun['put_conf']
         res = method(data)
         sock.shutdown(socket.SHUT_RDWR)
@@ -419,7 +419,7 @@ class HTTPDaemon(object):
                                     v = zlib.decompress(v)
                                     print_mem("in f_wrapper, after decompress")
                                     v = cPickle.loads(v)
-                                    print_mem("in f_wrapper, after unpickle: %s" % v)
+                                    print_mem("in f_wrapper, after unpickle")
                             elif method == 'get':
                                 v = bottle.request.GET.get(aname, None)
                             if v is None:

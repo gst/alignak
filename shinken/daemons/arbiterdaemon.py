@@ -31,7 +31,7 @@ import socket
 import traceback
 import cStringIO
 import cPickle
-import copy
+import gc
 import json
 from shinken.misc.meminfo import print_mem
 
@@ -68,7 +68,10 @@ class IForArbiter(Interface):
     doc = 'Put a new configuration to the daemon'
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf):
-        conf = cPickle.loads(conf)
+        if False:
+            print_mem("before unpickle in put_conf")
+            conf = cPickle.loads(conf)
+            print_mem("after unpickle in put_conf: %s" % conf)
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
     put_conf.method = 'POST'
