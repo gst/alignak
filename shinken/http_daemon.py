@@ -267,6 +267,49 @@ class WSGIREFBackend(object):
         self.srv.handle_request()
 
 
+class Simple(object):
+    def __init__(self, host, port, httpdaemon):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        self.sock.bind((host, port))
+        self.sock.listen(5)
+        self.httpdaemon = httpdaemon
+        self.start_thread()
+
+
+    def start_thread(self):
+        self.thread = threading.Thread(target=self.thread_run)
+        self.thread.start()
+
+    def stop(self):
+        pass
+
+    def run(self):
+        while True:
+            if not self.thread.isAlive():
+                self.thread.join()
+                self.start_thread()
+            else:
+                time.sleep(1)
+
+    def thread_run(self):
+        sock = self.sock.accept()[0]
+        data = b''
+        while True:
+            new_data = sock.recv(4096)
+            if not new_data:
+                break
+            data += new_data
+        print_mem("after tcp-read: len(data) = %s" % len(data))
+        data = zlib.decompress(data)
+        print_mem("after decompress: len(data) = %s" % len(data))
+        method = self.httpdaemon.registered_fun['put_conf']
+        res = method(data)
+        sock.shutdown(socket.SHUT_RDWR)
+        sock.close()
+
+
+
 
 class HTTPDaemon(object):
         def __init__(self, host, port, http_backend, use_ssl, ca_cert,
