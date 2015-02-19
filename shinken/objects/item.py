@@ -206,7 +206,8 @@ Like temporary attributes such as "imported_from", etc.. """
                 pass
 
     def __str__(self):
-        return str(self.__dict__) + '\n'
+        name = getattr(self, 'name', None)
+        return '<%s name=%r %s />' % (self.__class__.__name__, name, super(Item, self).__str__())
 
     def is_tpl(self):
         """ Return if the elements is a template """
@@ -1077,11 +1078,9 @@ class Items(object):
             i.fill_default()
 
     def __str__(self):
-        s = ''
-        cls = self.__class__
-        for id in self.items:
-            s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
-        return s
+        n = len(getattr(self, 'items', []))
+        return '<%s n_items=%s %s />' % (
+            self.__class__.__name__, n, object.__str__(self))
 
     # Inheritance for just a property
     def apply_partial_inheritance(self, prop):
