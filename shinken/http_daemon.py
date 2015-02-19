@@ -230,6 +230,7 @@ class WSGIREFBackend(object):
 
     # Manually manage the number of threads
     def run(self):
+        idx = 0
         # Ok create the thread
         nb_threads = self.daemon_thread_pool_size
         # Keep a list of our running threads
@@ -258,7 +259,8 @@ class WSGIREFBackend(object):
                 if sock in ins:
                     # GO!
                     t = threading.Thread(None, target=self.handle_one_request_thread,
-                                         name='http-request', args=(sock,))
+                                         name='http-request-%s' % idx, args=(sock,))
+                    idx += 1
                     # We don't want to hang the master thread just because this one is still alive
                     t.daemon = True
                     t.start()
