@@ -305,6 +305,9 @@ class Simple(object):
         print_mem("after tcp-read: len(data) = %s" % len(data))
         data = zlib.decompress(data)
         print_mem("after decompress: len(data) = %s" % len(data))
+        if True:
+            data = cPickle.loads(data)
+            print_mem("after unpickle: conf = %s" % data)
         method = self.httpdaemon.registered_fun['put_conf']
         res = method(data)
         sock.shutdown(socket.SHUT_RDWR)
