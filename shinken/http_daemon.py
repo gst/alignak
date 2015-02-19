@@ -33,6 +33,8 @@ import inspect
 import json
 import zlib
 import threading
+from shinken.misc.meminfo import print_mem
+
 try:
     import ssl
 except ImportError:
@@ -401,16 +403,20 @@ class HTTPDaemon(object):
 
                         # Warning : put the bottle.response set inside the wrapper
                         # because outside it will break bottle
+                        print_mem("in f_wrapper, before bottle.forms.get")
                         d = {}
                         method = getattr(f, 'method', 'get').lower()
                         for aname in args:
                             v = None
                             if method == 'post':
                                 v = bottle.request.forms.get(aname, None)
+                                print_mem("in f_wrapper, after bottle.forms.get")
                                 # Post args are zlibed and cPickled
                                 if v is not None:
                                     v = zlib.decompress(v)
+                                    print_mem("in f_wrapper, after decompress")
                                     v = cPickle.loads(v)
+                                    print_mem("in f_wrapper, after unpickle: %s" % v)
                             elif method == 'get':
                                 v = bottle.request.GET.get(aname, None)
                             if v is None:
