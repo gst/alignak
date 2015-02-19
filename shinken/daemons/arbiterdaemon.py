@@ -33,6 +33,7 @@ import cStringIO
 import cPickle
 import copy
 import json
+from shinken.misc.meminfo import print_mem
 
 from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
@@ -44,6 +45,8 @@ from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.property import BoolProp
 from shinken.util import jsonify_r
+
+
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
@@ -626,19 +629,33 @@ class Arbiter(Daemon):
 
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
-        old_conf = self.cur_conf
-        if old_conf:
+        old_conf = self.conf
+        do_release = False
+        if do_release and old_conf:
+            print_mem("before release")
             old_conf.release()
+            #del old_conf
+            print_mem("after release")
+            #gc.collect()
         conf = self.new_conf
+        #conf = cPickle.loads(conf)
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf
+        print_mem('after self.conf=conf')
         for arb in self.conf.arbiters:
+            try:
+                arb.address, arb.port
+            except AttributeError as err:
+                print("damn : %s" % err)
+                continue
             if (arb.address, arb.port) == (self.host, self.port):
                 self.me = arb
                 arb.is_me = lambda x: True  # we now definitively know who we are, just keep it.
             else:
                 arb.is_me = lambda x: False  # and we know who we are not, just keep it.
+        gc.collect()
+        print_mem('after gc.collect')
 
 
     def do_loop_turn(self):
@@ -684,6 +701,7 @@ class Arbiter(Daemon):
                 master_timeout = arb.check_interval * arb.max_check_attempts
         logger.info("I'll wait master for %d seconds", master_timeout)
 
+        print_mem("on start")
 
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
