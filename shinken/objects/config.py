@@ -778,6 +778,18 @@ class Config(Item):
         self.packs_dirs = []
         self.packs = Packs({})
 
+    def release(self):
+        ''' Release all this config values
+
+        '''
+        for data in self.types_creations.values():
+            logger.info('Releasing %s ..', data[2])
+            obj = getattr(self, data[2])
+            obj.release()
+        super(Config, self).release()
+        logger.info('%r : all released', self)
+
+
     def get_name(self):
         return 'global configuration file'
 
