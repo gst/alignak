@@ -629,9 +629,11 @@ class Arbiter(Daemon):
         if not conf:
             return
         conf = cPickle.loads(conf)
+        old_conf = self.conf
+        if old_conf:
+            old_conf.release()
         self.new_conf = None
-        self.cur_conf = conf
-        self.conf = conf
+        self.conf = self.cur_conf = conf
         for arb in self.conf.arbiters:
             if (arb.address, arb.port) == (self.host, self.port):
                 self.me = arb
