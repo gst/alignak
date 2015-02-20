@@ -154,8 +154,9 @@ class Item(object):
                 setattr(self, key, val)
 
     def release(self):
-        for attr, value in vars(self).items():
+        for attr in filter(lambda x: not x.startswith('__'), dir(self)):
             try:
+                value = getattr(self, attr)
                 if isinstance(value, (Item, Items)):
                     value.release()
                 delattr(self, attr)
@@ -744,10 +745,11 @@ class Items(object):
         self.items.clear()
         self.name_to_item.clear()
         self.name_to_template.clear()
-        for attr, value in vars(self).items():
-            if isinstance(value, (Item, Items)):
-                value.release()
+        for attr in filter(lambda x: not x.startswith('__'), dir(self)):
             try:
+                value = getattr(self, attr)
+                if isinstance(value, (Item, Items)):
+                    value.release()
                 delattr(self, attr)
             except (AttributeError, TypeError):
                 pass
