@@ -344,12 +344,15 @@ class HTTPDaemon(object):
             __import__('BaseHTTPServer').BaseHTTPRequestHandler.address_string = \
                 lambda x: x.client_address[0]
 
-            if http_backend == 'cherrypy' or http_backend == 'auto' and cheery_wsgiserver:
-                self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key,
-                                           ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+            if False:
+                if False and (http_backend == 'cherrypy' or http_backend == 'auto' and cheery_wsgiserver):
+                    self.srv = CherryPyBackend(host, port, use_ssl, ca_cert, ssl_key,
+                                               ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+                else:
+                    self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key,
+                                              ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
             else:
-                self.srv = WSGIREFBackend(host, port, use_ssl, ca_cert, ssl_key,
-                                          ssl_cert, hard_ssl_name_check, daemon_thread_pool_size)
+                self.srv = Simple(host, port, self)
 
             self.lock = threading.RLock()
 
