@@ -168,6 +168,33 @@ class IForArbiter(Interface):
     get_objects_properties.doc = doc
 
 
+    def get_meminfo(self):
+        import pympler.summary
+        import pympler.muppy
+        import types
+        all_objects = pympler.muppy.get_objects()
+        types = pympler.muppy.filter(all_objects, Type=types.ClassType)
+        summary = pympler.summary.summarize(all_objects)
+        self._prev_mem_summary = summary
+        return summary
+
+
+    def compare_meminfo(self):
+        import pympler.summary
+        prev = self._prev_mem_summary
+        new = self.get_meminfo()
+        diff = pympler.summary.get_diff(prev, new)
+        pympler.summary.print_(diff)
+
+
+    def print_meminfo(self):
+        import pympler.summary
+        summary = self.get_meminfo()
+        pympler.summary.print_(summary)
+
+
+
+
 # Main Arbiter Class
 class Arbiter(Daemon):
 
