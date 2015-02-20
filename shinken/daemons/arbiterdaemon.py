@@ -68,10 +68,10 @@ class IForArbiter(Interface):
     doc = 'Put a new configuration to the daemon'
     # The master Arbiter is sending us a new conf in a pickle way. Ok, we take it
     def put_conf(self, conf):
-        if False:
+        if True:
             print_mem("before unpickle in put_conf")
             conf = cPickle.loads(conf)
-            print_mem("after unpickle in put_conf: %s" % conf)
+            print_mem("after unpickle in put_conf")
         super(IForArbiter, self).put_conf(conf)
         self.app.must_run = False
     put_conf.method = 'POST'
@@ -633,7 +633,8 @@ class Arbiter(Daemon):
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
         old_conf = self.conf
-        do_release = False
+        print('old_conf = %s' % old_conf)
+        do_release = 0
         if do_release and old_conf:
             print_mem("before release")
             old_conf.release()
@@ -641,11 +642,14 @@ class Arbiter(Daemon):
             print_mem("after release")
             #gc.collect()
         conf = self.new_conf
-        #conf = cPickle.loads(conf)
+        if False:
+            print_mem("before unpickle in setup_new_conf")
+            conf = cPickle.loads(conf)
+            print_mem("after unpickle in setup_new_conf")
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf
-        print_mem('after self.conf=conf')
+        print_mem('after self.conf = new_conf')
         for arb in self.conf.arbiters:
             try:
                 arb.address, arb.port
@@ -657,8 +661,9 @@ class Arbiter(Daemon):
                 arb.is_me = lambda x: True  # we now definitively know who we are, just keep it.
             else:
                 arb.is_me = lambda x: False  # and we know who we are not, just keep it.
-        gc.collect()
-        print_mem('after gc.collect')
+        if 0:
+            gc.collect()
+            print_mem('after gc.collect')
 
 
     def do_loop_turn(self):
