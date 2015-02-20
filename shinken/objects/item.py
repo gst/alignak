@@ -153,6 +153,14 @@ class Item(object):
             else:
                 setattr(self, key, val)
 
+    def release(self):
+        for attr, value in vars(self).items():
+            try:
+                if isinstance(value, (Item, Items)):
+                    value.release()
+                delattr(self, attr)
+            except (TypeError, AttributeError):
+                pass
 
     # When values to set on attributes are unique (single element list),
     # return the value directly rather than setting list element.
@@ -722,7 +730,27 @@ class Items(object):
         self.add_items(items, index_items)
 
     def __del__(self):
-        print('%s : __del__' % self)
+        self.release()
+        print('%s : __del__ called' % self)
+
+
+    def release(self):
+        try:
+            items = self.items
+        except AttributeError:
+            return
+        for item in items.itervalues():
+            item.release()
+        self.items.clear()
+        self.name_to_item.clear()
+        self.name_to_template.clear()
+        for attr, value in vars(self).items():
+            if isinstance(value, (Item, Items)):
+                value.release()
+            try:
+                delattr(self, attr)
+            except (AttributeError, TypeError):
+                pass
 
     def get_source(self, item):
         source = getattr(item, 'imported_from', None)
