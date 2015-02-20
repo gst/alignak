@@ -2403,7 +2403,7 @@ class Config(Item):
             random.seed(time.time())
 
     def __del__(self):
-        logger.info('%s : __del__ called !', self)
+        print('%s : __del__ called !' % self)
 
 
     def dump(self, f=None):
