@@ -721,6 +721,9 @@ class Items(object):
         self.configuration_errors = []
         self.add_items(items, index_items)
 
+    def __del__(self):
+        print('%s : __del__' % self)
+
     def get_source(self, item):
         source = getattr(item, 'imported_from', None)
         if source:

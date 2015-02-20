@@ -2390,6 +2390,9 @@ class Config(Item):
             self.confs[i].instance_id = i
             random.seed(time.time())
 
+    def __del__(self):
+        logger.info('%s : __del__ called !', self)
+
 
     def dump(self, f=None):
         dmp = {}
