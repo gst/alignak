@@ -628,7 +628,6 @@ class Arbiter(Daemon):
         conf = self.new_conf
         if not conf:
             return
-        conf = cPickle.loads(conf)
         old_conf = self.conf
         if old_conf:
             old_conf.release()

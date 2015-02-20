@@ -147,7 +147,7 @@ class Dispatcher:
                         logger.error('CRITICAL: the arbiter try to send a configureion but '
                                      'it is not a MASTER one?? Look at your configuration.')
                         continue
-                    arb.put_conf(self.conf.whole_conf_pack)
+                    arb.put_conf(self.conf.whole_conf_pack, conf_already_pickled=True)
                     # Remind it that WE are the master here!
                     arb.do_not_run()
                 else:

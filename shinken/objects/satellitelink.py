@@ -114,7 +114,7 @@ class SatelliteLink(Item):
         self.uri = self.con.uri
 
 
-    def put_conf(self, conf):
+    def put_conf(self, conf, conf_already_pickled=False):
         if self.con is None:
             self.create_connection()
 
@@ -124,7 +124,8 @@ class SatelliteLink(Item):
 
         try:
             self.con.get('ping')
-            self.con.post('put_conf', {'conf': conf}, wait='long')
+            self.con.post('put_conf', {'conf': conf},
+                          wait='long', pickle_args=not conf_already_pickled)
             print "PUT CONF SUCESS", self.get_name()
             return True
         except HTTPExceptions, exp:

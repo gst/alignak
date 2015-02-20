@@ -134,11 +134,13 @@ class HTTPClient(object):
             return ret
 
     # Try to get an URI path
-    def post(self, path, args, wait='short'):
+    def post(self, path, args, wait='short', pickle_args=True):
         size = 0
         # Take args, pickle them and then compress the result
         for (k, v) in args.iteritems():
-            args[k] = zlib.compress(cPickle.dumps(v), 2)
+            if pickle_args:
+                v = cPickle.dumps(v)
+            args[k] = zlib.compress(v, 2)
             size += len(args[k])
         # Ok go for it!
         logger.debug('Posting to %s: %sB' % (self.uri + path, size))
