@@ -75,6 +75,11 @@ class Item(object):
         'templates': ListProp(default=[]),
     }
 
+    __slots__ = (
+        'customs',
+        'plus',
+    )
+
     macros = {
     }
 

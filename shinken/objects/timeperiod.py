@@ -117,6 +117,15 @@ class Timeperiod(Item):
     })
     running_properties = Item.running_properties.copy()
 
+
+    __slots__ = (
+        'unresolved',
+        'invalid_entries',
+        'cache',
+        'invalid_cache',
+        'rec_tag',
+    )
+
     def __init__(self, params={}):
         cls = self.__class__
         self.id = cls.Id

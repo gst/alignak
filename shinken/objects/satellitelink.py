@@ -79,7 +79,16 @@ class SatelliteLink(Item):
         'reachable':            BoolProp(default=False, fill_brok=['full_status']),
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
         'managed_confs':        StringProp(default={}),
+
+        'need_conf':            BoolProp(default=True),
+        'uri':                  StringProp(default=''),
     })
+
+    __slots__ = (
+        'arb_satmap',
+        'alias',
+        'cfg',
+    )
 
     def __init__(self, *args, **kwargs):
         super(SatelliteLink, self).__init__(*args, **kwargs)

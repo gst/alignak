@@ -633,6 +633,10 @@ class Host(SchedulingItem):
         # 'criticitymodulations': 'business_impact_modulations',
     }
 
+    __slots__ = (
+        '__dict__',  # for attributes like 2d_coords which can't be used within slots..
+    )
+
 #######
 #                   __ _                       _   _
 #                  / _(_)                     | | (_)

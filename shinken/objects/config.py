@@ -654,8 +654,10 @@ class Config(Item):
                                                   (ReceiverLink, None),  (ArbiterLink, None)]),
 
         'triggers_dirs':    ListProp(default=[]),
+        'triggers':    ListProp(default=[]),
 
         'packs_dirs':    ListProp(default=[]),
+        'packs':    ListProp(default=[]),
     }
 
     macros = {
@@ -766,6 +768,14 @@ class Config(Item):
                            'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
                            'hostextinfo', 'serviceextinfo']
 
+
+    __slots__ = (
+        'params',
+        'resource_macros_names',
+        'conf_is_correct',
+        'magic_hash',
+        '__dict__',  # '$PLUGINSDIR$',
+    )
 
     def __init__(self):
         self.params = {}
