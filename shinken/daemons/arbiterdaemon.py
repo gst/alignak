@@ -650,11 +650,24 @@ class Arbiter(Daemon):
             raise
 
 
+    def _sub_pympler_thread(self, conf):
+        from pympler import refbrowser
+        ib = refbrowser.InteractiveBrowser(conf)
+        ib.main()
+
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
         conf = self.new_conf
         if not conf:
             return
+        if False:
+            #pympler_thread = getattr(self, '_pympler_thread', None)
+            #if pympler_thread is None:
+            import threading
+            th = self._pympler_thread = threading.Thread(
+                target=self._sub_pympler_thread, args=(conf,))
+            th.start()
+
         old_conf = self.conf
         if old_conf:
             old_conf.release()
