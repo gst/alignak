@@ -73,7 +73,7 @@ import cStringIO
 from alignak.log import logger
 from alignak.misc.common import setproctitle
 
-class Worker:
+class Worker(object):
     """This class is used for poller and reactionner to work.
     The worker is a process launch by theses process and read Message in a Queue
     (self.s) (slave)
@@ -87,26 +87,30 @@ class Worker:
     _mortal = None
     _idletime = None
     _timeout = None
-    _c = None
+    control_queue = None
 
-    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300,
-                 max_plugins_output_length=8192, target=None, loaded_into='unknown',
-                 http_daemon=None):
+    def __init__(self, s, returns_queue, processes_by_worker,
+                 mortal=True, timeout=300, max_plugins_output_length=8192,
+                 target=None, loaded_into='unknown', http_daemon=None,
+                 module_name='unknown_module'):
+        self.checks = []
+        self.t_each_loop = time.time()
         self.id = self.__class__.id
         self.__class__.id += 1
-
         self._mortal = mortal
         self._idletime = 0
         self._timeout = timeout
-        self.s = None
+        self.s = s
+        self.returns_queue = returns_queue
         self.processes_by_worker = processes_by_worker
-        self._c = Queue()  # Private Control queue for the Worker
+        self.control_queue = Queue()  # Private Control queue for the Worker
         # By default, take our own code
         if target is None:
             target = self.work
-        self._process = Process(target=target, args=(s, returns_queue, self._c))
+        self._process = Process(target=target, args=(s, returns_queue, self.control_queue))
         self.returns_queue = returns_queue
         self.max_plugins_output_length = max_plugins_output_length
+        self.module_name = module_name
         self.i_am_dying = False
         # Keep a trace where the worker is launch from (poller or reactionner?)
         self.loaded_into = loaded_into
@@ -132,9 +136,9 @@ class Worker:
             self._process.terminate()
         # Is we are with a Manager() way
         # there should be not such functions
-        if hasattr(self._c, 'close'):
-            self._c.close()
-            self._c.join_thread()
+        if hasattr(self.control_queue, 'close'):
+            self.control_queue.close()
+            self.control_queue.join_thread()
         if hasattr(self.s, 'close'):
             self.s.close()
             self.s.join_thread()
@@ -155,7 +159,7 @@ class Worker:
         self._idletime = 0
 
     def send_message(self, msg):
-        self._c.put(msg)
+        self.control_queue.put(msg)
 
     # A zombie is immortal, so kill not be kill anymore
     def set_zombie(self):
@@ -167,15 +171,13 @@ class Worker:
     # REF: doc/alignak-action-queues.png (3)
     def get_new_checks(self):
         try:
-            while(len(self.checks) < self.processes_by_worker):
-                # print "I", self.id, "wait for a message"
+            while len(self.checks) < self.processes_by_worker:
                 msg = self.s.get(block=False)
                 if msg is not None:
                     self.checks.append(msg.get_data())
-                # print "I", self.id, "I've got a message!"
-        except Empty, exp:
-            if len(self.checks) == 0:
-                self._idletime = self._idletime + 1
+        except Empty:
+            if not self.checks:
+                self._idletime += 1
                 time.sleep(1)
         # Maybe the Queue() is not available, if so, just return
         # get back to work :)
@@ -217,8 +219,8 @@ class Worker:
                 # msg = Message(id=self.id, type='Result', data=action)
                 try:
                     self.returns_queue.put(action)
-                except IOError, exp:
-                    logger.error("[%d] Exiting: %s", self.id, exp)
+                except IOError as err:
+                    logger.error("[%s] Exiting: %s", self.id, err)
                     sys.exit(2)
 
         # Little sleep
@@ -229,6 +231,7 @@ class Worker:
 
         # Little sleep
         time.sleep(wait_time)
+
 
     # Check if our system time change. If so, change our
     def check_for_system_time_change(self):
@@ -244,29 +247,17 @@ class Worker:
         else:
             return 0
 
-
     # Wrapper function for work in order to catch the exception
     # to see the real work, look at do_work
-    def work(self, s, returns_queue, c):
+    def work(self, s, returns_queue, control_queue):
         try:
-            self.do_work(s, returns_queue, c)
-        # Catch any exception, try to print it and exit anyway
-        except Exception, exp:
-            output = cStringIO.StringIO()
-            traceback.print_exc(file=output)
-            logger.error("Worker '%d' exit with an unmanaged exception : %s",
-                         self.id, output.getvalue())
-            output.close()
-            # Ok I die now
+            self.do_work()
+        except Exception as err:
+            logger.error("Worker %s: Got fatal unexpected error: %s", self.id, err)
             raise
 
+    def do_work(self):
 
-    # id = id of the worker
-    # s = Global Queue Master->Slave
-    # m = Queue Slave->Master
-    # return_queue = queue managed by manager
-    # c = Control Queue for the worker
-    def do_work(self, s, returns_queue, c):
         # restore default signal handler for the workers:
         # but on android, we are a thread, so don't do it
         if not is_android:
@@ -279,14 +270,9 @@ class Worker:
             self.http_daemon.shutdown()
 
         timeout = 1.0
-        self.checks = []
-        self.returns_queue = returns_queue
-        self.s = s
-        self.t_each_loop = time.time()
+
         while True:
             begin = time.time()
-            msg = None
-            cmsg = None
 
             # If we are dying (big problem!) we do not
             # take new jobs, we just finished the current one
@@ -300,12 +286,15 @@ class Worker:
 
             # Now get order from master
             try:
-                cmsg = c.get(block=False)
-                if cmsg.get_type() == 'Die':
+                msg = self.control_queue.get(block=False)
+            except Empty:
+                pass
+            else:
+                if msg.get_type() == 'Die':
                     logger.debug("[%d] Dad say we are dying...", self.id)
                     break
-            except Exception:
-                pass
+                else:
+                    logger.info('Got unhandled message from control_queue: %r', msg)
 
             # Look if we are dying, and if we finish all current checks
             # if so, we really die, our master poller will launch a new
@@ -324,4 +313,4 @@ class Worker:
                 timeout = 1.0
 
     def set_proctitle(self):
-        setproctitle("alignak-%s worker" % self.loaded_into)
+        setproctitle("shinken-%s worker[%s]" % (self.loaded_into, self.id))

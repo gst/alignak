@@ -80,9 +80,7 @@ class TestTimeout(AlignakTest):
 
         # This testscript plays the role of the reactionner
         # Now "fork" a worker
-        w = Worker(1, to_queue, from_queue, 1)
-        w.id = 1
-        w.i_am_dying = False
+        w = Worker(to_queue, from_queue, 1)
 
         # We prepare a notification in the to_queue
         c = Contact()
