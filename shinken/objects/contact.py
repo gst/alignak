@@ -45,7 +45,7 @@ _simple_way_parameters = (
 
 
 class Contact(Item):
-    id = 1  # zero is always special in database, so we do not take risk here
+
     my_type = 'contact'
 
     properties = Item.properties.copy()

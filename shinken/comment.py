@@ -27,7 +27,6 @@ import time
 
 """ TODO: Add some comment about this class for the doc"""
 class Comment(object):
-    id = 1
 
     properties = {
         'entry_time':   None,

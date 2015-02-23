@@ -41,7 +41,6 @@ class SatelliteLink(Item):
     Arbiter with Conf Dispatcher.
 
     """
-    # id = 0 each Class will have it's own id
 
     properties = Item.properties.copy()
     properties.update({

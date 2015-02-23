@@ -30,7 +30,6 @@ from shinken.property import IntegerProp, StringProp, ListProp
 
 
 class Hostescalation(Item):
-    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'hostescalation'
 
     properties = Item.properties.copy()

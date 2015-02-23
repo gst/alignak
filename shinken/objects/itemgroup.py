@@ -37,7 +37,6 @@ from shinken.log import logger
 # TODO: subclass Item & Items for Itemgroup & Itemgroups?
 class Itemgroup(Item):
 
-    id = 0
 
     properties = Item.properties.copy()
     properties.update({
@@ -47,9 +46,10 @@ class Itemgroup(Item):
     })
 
     def __init__(self, params={}):
-        self.id = self.__class__.id
-        self.__class__.id += 1
         cls = self.__class__
+        self.id = cls.Id
+        cls.Id += 1
+
         self.init_running_properties()
 
         for key in params:
@@ -73,10 +73,10 @@ class Itemgroup(Item):
     # members need to be fill after manually
     def copy_shell(self):
         cls = self.__class__
-        old_id = cls.id
+        old_id = cls.Id
         new_i = cls()  # create a new group
         new_i.id = self.id  # with the same id
-        cls.id = old_id  # Reset the Class counter
+        cls.Id = old_id  # Reset the Class counter
 
         # Copy all properties
         for prop in cls.properties:

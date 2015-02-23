@@ -42,7 +42,7 @@ class AutoSlots(type):
     # Host, so we must tag them in properties with no_slots
     def __new__(cls, name, bases, dct):
         # Thanks to Bertrand Mathieu to the set idea
-        slots = dct.get('__slots__', set())
+        slots = set(dct.get('__slots__', set()))
         # Now get properties from properties and running_properties
         if 'properties' in dct:
             props = dct['properties']
@@ -53,4 +53,6 @@ class AutoSlots(type):
             slots.update((p for p in props
                           if not props[p].no_slots))
         dct['__slots__'] = tuple(slots)
-        return type.__new__(cls, name, bases, dct)
+        klass = type.__new__(cls, name, bases, dct)
+        klass.Id = 1
+        return klass

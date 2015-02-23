@@ -33,7 +33,6 @@ from shinken.http_client import HTTPExceptions
 class ReceiverLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
 
-    id = 0
     my_type = 'receiver'
     properties = SatelliteLink.properties.copy()
     properties.update({

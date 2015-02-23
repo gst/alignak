@@ -31,7 +31,7 @@ from .service import Service
 
 
 class Servicedependency(Item):
-    id = 0
+
     my_type = "servicedependency"
 
     # F is dep of D

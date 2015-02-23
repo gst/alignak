@@ -32,7 +32,6 @@ from shinken.log import logger
 
 
 class MacroModulation(Item):
-    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'macromodulation'
 
     properties = Item.properties.copy()

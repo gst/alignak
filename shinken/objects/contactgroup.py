@@ -35,7 +35,7 @@ from shinken.log import logger
 
 
 class Contactgroup(Itemgroup):
-    id = 1
+
     my_type = 'contactgroup'
 
     properties = Itemgroup.properties.copy()

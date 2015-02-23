@@ -31,7 +31,7 @@ from .service import Service
 
 
 class Servicegroup(Itemgroup):
-    id = 1  # zero is always a little bit special... like in database
+
     my_type = 'servicegroup'
 
     properties = Itemgroup.properties.copy()

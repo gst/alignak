@@ -31,7 +31,7 @@ from shinken.log import logger
 
 
 class Hostgroup(Itemgroup):
-    id = 1  # zero is always a little bit special... like in database
+
     my_type = 'hostgroup'
 
     properties = Itemgroup.properties.copy()

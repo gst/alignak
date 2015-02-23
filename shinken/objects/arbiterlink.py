@@ -32,7 +32,7 @@ from shinken.log import logger
 
 """ TODO: Add some comment about this class for the doc"""
 class ArbiterLink(SatelliteLink):
-    id = 0
+
     my_type = 'arbiter'
     properties = SatelliteLink.properties.copy()
     properties.update({

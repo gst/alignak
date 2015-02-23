@@ -31,6 +31,7 @@ import cPickle  # for hashing compute
 import itertools
 
 # Try to import md5 function
+from shinken.autoslots import AutoSlots
 try:
     from hashlib import md5
 except ImportError:
@@ -79,8 +80,8 @@ class Item(object):
         # use set attr for going into the slots
         # instead of __dict__ :)
         cls = self.__class__
-        self.id = cls.id
-        cls.id += 1
+        self.id = cls.Id
+        cls.Id += 1
 
         self.customs = {}  # for custom variables
         self.plus = {}  # for value with a +

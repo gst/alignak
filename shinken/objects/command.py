@@ -41,7 +41,6 @@ class Command(Item):
     # running_properties names
     __metaclass__ = AutoSlots
 
-    id = 0
     my_type = "command"
 
     properties = Item.properties.copy()
@@ -56,9 +55,9 @@ class Command(Item):
     })
 
     def __init__(self, params={}):
-        setattr(self, 'id', self.__class__.id)
-        # self.id = self.__class__.id
-        self.__class__.id += 1
+        cls = self.__class__
+        self.id = cls.Id
+        cls.Id += 1
 
         self.init_running_properties()
 

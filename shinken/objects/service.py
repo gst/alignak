@@ -54,9 +54,6 @@ class Service(SchedulingItem):
     # running_properties names
     __metaclass__ = AutoSlots
 
-    # Every service have a unique ID, and 0 is always special in
-    # database and co...
-    id = 1
     # The host and service do not have the same 0 value, now yes :)
     ok_up = 'OK'
     # used by item class for format specific value like for Broks

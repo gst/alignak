@@ -28,7 +28,7 @@ from shinken.property import IntegerProp, StringProp
 
 class BrokerLink(SatelliteLink):
     """TODO: Add some comment about this class for the doc"""
-    id = 0
+
     my_type = 'broker'
     properties = SatelliteLink.properties.copy()
     properties.update({

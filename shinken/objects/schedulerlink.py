@@ -32,8 +32,6 @@ from shinken.http_client import HTTPExceptions
 class SchedulerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
 
-    id = 0
-
     # Ok we lie a little here because we are a mere link in fact
     my_type = 'scheduler'
 

@@ -33,7 +33,7 @@ _special_properties = ('service_notification_commands', 'host_notification_comma
 
 
 class NotificationWay(Item):
-    id = 1  # zero is always special in database, so we do not take risk here
+
     my_type = 'notificationway'
 
     properties = Item.properties.copy()

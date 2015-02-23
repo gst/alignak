@@ -34,7 +34,7 @@ from shinken.log import logger
 # properties, just the realm_members that we rewrite on it.
 
 class Realm(Itemgroup):
-    id = 1  # zero is always a little bit special... like in database
+
     my_type = 'realm'
 
     properties = Itemgroup.properties.copy()

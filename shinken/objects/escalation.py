@@ -36,7 +36,6 @@ _special_properties_time_based = ('contacts', 'contact_groups',
 
 
 class Escalation(Item):
-    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'escalation'
 
     properties = Item.properties.copy()

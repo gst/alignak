@@ -100,7 +100,7 @@ from shinken.log import logger, naglog_result
 
 
 class Timeperiod(Item):
-    id = 1
+
     my_type = 'timeperiod'
 
     properties = Item.properties.copy()
@@ -118,8 +118,9 @@ class Timeperiod(Item):
     running_properties = Item.running_properties.copy()
 
     def __init__(self, params={}):
-        self.id = Timeperiod.id
-        Timeperiod.id = Timeperiod.id + 1
+        cls = self.__class__
+        self.id = cls.Id
+        cls.Id += 1
         self.unresolved = []
         self.dateranges = []
         self.exclude = ''

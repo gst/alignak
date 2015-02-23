@@ -31,7 +31,7 @@ from shinken.log import logger
 
 
 class CheckModulation(Item):
-    id = 1  # zero is always special in database, so we do not take risk here
+
     my_type = 'checkmodulation'
 
     properties = Item.properties.copy()

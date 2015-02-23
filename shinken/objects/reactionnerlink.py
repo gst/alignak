@@ -30,7 +30,6 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 class ReactionnerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
 
-    id = 0
     my_type = 'reactionner'
     properties = SatelliteLink.properties.copy()
     properties.update({

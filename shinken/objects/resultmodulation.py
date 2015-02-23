@@ -35,7 +35,7 @@ from shinken.property import StringProp, IntegerProp, IntListProp
 
 
 class Resultmodulation(Item):
-    id = 1  # zero is always special in database, so we do not take risk here
+
     my_type = 'resultmodulation'
 
     properties = Item.properties.copy()
