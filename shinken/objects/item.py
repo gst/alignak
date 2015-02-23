@@ -112,7 +112,9 @@ class Item(object):
                     self.configuration_warnings.append(warning)
                     val = self.running_properties[key].pythonize(params[key])
                 elif hasattr(self, 'old_properties') and key in self.old_properties:
-                    val = self.properties[self.old_properties[key]].pythonize(params[key])
+                    old_key = key
+                    key = self.old_properties[key]
+                    val = self.properties[key].pythonize(params[old_key])
                 elif key.startswith('_'):  # custom macro, not need to detect something here
                     _t = params[key]
                     # If it's a string, directly use this
