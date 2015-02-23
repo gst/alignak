@@ -53,6 +53,8 @@ from shinken.graph import Graph
 
 class Item(object):
 
+    __metaclass__ = AutoSlots
+
     properties = {
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=None, split_on_coma=True),
@@ -64,6 +66,7 @@ class Item(object):
     }
 
     running_properties = {
+        'id':                       IntegerProp(default=0),
         # All errors and warning raised during the configuration parsing
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings':   ListProp(default=[]),
@@ -161,6 +164,30 @@ class Item(object):
                 self.customs[custom_name] = val
             else:
                 setattr(self, key, val)
+
+    def __getstate__(self):
+        cls = self.__class__
+        # id is not in *_properties
+        res = {'id': getattr(self, 'id', self.Id)}
+        for prop in cls.properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+        for prop in cls.running_properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+        return res
+
+    # Inversed function of __getstate__
+    def __setstate__(self, state):
+        cls = self.__class__
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+        for prop in cls.running_properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+
 
     def release(self):
         for attr in filter(lambda x: not x.startswith('__'), dir(self)):
