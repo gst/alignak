@@ -25,8 +25,8 @@
 
 import re
 
-from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split
 import logging
+from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
            'CharProp', 'StringProp', 'ListProp',
@@ -141,7 +141,7 @@ class UnusedProp(Property):
     # 'text' a some usage text if present, will print it to explain
     # why it's no more useful
     def __init__(self, text=None):
-
+        super(UnusedProp, self).__init__()
         if text is None:
             text = ("This parameter is no longer useful in the "
                     "Shinken architecture.")
