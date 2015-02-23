@@ -61,6 +61,9 @@ class SatelliteLink(Item):
         'use_ssl':             BoolProp(default=False, fill_brok=['full_status']),
         'hard_ssl_name_check': BoolProp(default=True, fill_brok=['full_status']),
         'passive':             BoolProp(default=False, fill_brok=['full_status'], to_send=True),
+
+        # each satellite can have its own modules_dir:
+        'modules_dir':          StringProp(),
     })
 
     running_properties = Item.running_properties.copy()

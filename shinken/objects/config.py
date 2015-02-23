@@ -652,6 +652,10 @@ class Config(Item):
                                    class_inherit=[(SchedulerLink, None), (ReactionnerLink, None),
                                                   (BrokerLink, None), (PollerLink, None),
                                                   (ReceiverLink, None),  (ArbiterLink, None)]),
+
+        'triggers_dirs':    ListProp(default=[]),
+
+        'packs_dirs':    ListProp(default=[]),
     }
 
     macros = {

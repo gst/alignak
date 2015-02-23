@@ -82,8 +82,8 @@ class Contact(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-        'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
-        'downtimes': StringProp(default=[], fill_brok=['full_status'], retention=True),
+        'modified_attributes': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'downtimes':           ListProp(default=[], fill_brok=['full_status'], retention=True),
     })
 
     # This tab is used to transform old parameters name into new ones

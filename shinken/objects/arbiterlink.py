@@ -25,7 +25,7 @@
 import socket
 
 from shinken.objects.satellitelink import SatelliteLink, SatelliteLinks
-from shinken.property import IntegerProp, StringProp
+from shinken.property import IntegerProp, StringProp, BoolProp
 from shinken.http_client import HTTPExceptions
 from shinken.log import logger
 
@@ -40,6 +40,11 @@ class ArbiterLink(SatelliteLink):
         'host_name':       StringProp(default=socket.gethostname()),
         'port':            IntegerProp(default=7770),
     })
+
+    running_properties = SatelliteLink.running_properties.copy()
+    running_properties.update(
+        need_conf=BoolProp(default=True),
+    )
 
     def get_name(self):
         return self.arbiter_name

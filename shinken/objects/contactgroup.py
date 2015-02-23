@@ -30,7 +30,7 @@
 
 from itemgroup import Itemgroup, Itemgroups
 
-from shinken.property import IntegerProp, StringProp
+from shinken.property import IntegerProp, StringProp, ListProp
 from shinken.log import logger
 
 
@@ -43,6 +43,7 @@ class Contactgroup(Itemgroup):
         'id':                   IntegerProp(default=0, fill_brok=['full_status']),
         'contactgroup_name':    StringProp(fill_brok=['full_status']),
         'alias':                StringProp(fill_brok=['full_status']),
+        'contactgroup_members': ListProp(default=[]),
     })
 
     macros = {

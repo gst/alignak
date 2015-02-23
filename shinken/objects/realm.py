@@ -55,6 +55,33 @@ class Realm(Itemgroup):
     running_properties = Item.running_properties.copy()
     running_properties.update({
         'serialized_confs': DictProp(default={}),
+
+        'pollers':          ListProp(default=[]),
+        'schedulers':       ListProp(default=[]),
+        'reactionners':     ListProp(default=[]),
+        'brokers':          ListProp(default=[]),
+        'receivers':        ListProp(default=[]),
+        'packs':            ListProp(default=[]),
+
+        'confs':            DictProp(default={}),
+
+        'to_satellites':    DictProp(default={}),
+        'to_satellites_need_dispatch':
+                            DictProp(default={}),
+        'to_satellites_managed_by':
+                            DictProp(default={}),
+
+        'nb_reactionners':  IntegerProp(default=0),
+        'nb_pollers':       IntegerProp(default=0),
+        'nb_brokers':       IntegerProp(default=0),
+        'nb_schedulers':    IntegerProp(default=0),
+        'nb_receivers':     IntegerProp(default=0),
+
+        'potential_reactionners':   ListProp(default=[]),
+        'potential_pollers':        ListProp(default=[]),
+        'potential_brokers':        ListProp(default=[]),
+        'potential_receivers':        ListProp(default=[]),
+
     })
 
     macros = {

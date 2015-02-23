@@ -30,7 +30,7 @@
 from item import Item, Items
 
 from shinken.brok import Brok
-from shinken.property import StringProp, ListProp, ToGuessProp
+from shinken.property import StringProp, ListProp, ToGuessProp, BoolProp
 from shinken.log import logger
 
 
@@ -44,6 +44,11 @@ class Itemgroup(Item):
         # Shinken specific
         'unknown_members': ListProp(default=None),
     })
+
+    running_properties = Item.running_properties.copy()
+    running_properties.update(
+        already_explode=BoolProp(default=False),
+    )
 
     def __init__(self, params={}):
         cls = self.__class__

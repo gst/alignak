@@ -58,6 +58,9 @@ class NotificationWay(Item):
             StringProp(fill_brok=['full_status']),
         'min_business_impact':
             IntegerProp(default=0, fill_brok=['full_status']),
+
+        'alias':
+            StringProp(default=''),
     })
 
     running_properties = Item.running_properties.copy()

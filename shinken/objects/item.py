@@ -57,6 +57,7 @@ class Item(object):
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=None, split_on_coma=True),
         'name':                     StringProp(default=''),
+        'display_name':             StringProp(default=''),
         'definition_order':         IntegerProp(default=100),
         # TODO: find why we can't uncomment this line below.
         'register':                 BoolProp(default=True),
@@ -70,6 +71,8 @@ class Item(object):
         'hash':   StringProp(default=''),
         # We save all template we asked us to load from
         'tags': ListProp(default=set(), fill_brok=['full_status']),
+
+        'templates': ListProp(default=[]),
     }
 
     macros = {
