@@ -46,9 +46,6 @@ from shinken.log import logger, naglog_result
 
 
 class Host(SchedulingItem):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
 
     ok_up = 'UP'
     my_type = 'host'

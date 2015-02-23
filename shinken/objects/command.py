@@ -37,9 +37,6 @@ class DummyCommand(object):
 
 
 class Command(Item):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
 
     my_type = "command"
 

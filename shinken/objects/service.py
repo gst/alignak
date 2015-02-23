@@ -50,9 +50,6 @@ from shinken.log import logger, naglog_result
 
 
 class Service(SchedulingItem):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
 
     # The host and service do not have the same 0 value, now yes :)
     ok_up = 'OK'

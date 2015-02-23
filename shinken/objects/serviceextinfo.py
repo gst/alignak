@@ -36,9 +36,6 @@ from shinken.property import StringProp, ListProp
 
 
 class ServiceExtInfo(Item):
-    # AutoSlots create the __slots__ with properties and
-    # running_properties names
-    __metaclass__ = AutoSlots
 
     my_type = 'serviceextinfo'
 
