@@ -528,5 +528,24 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
+
+
+class Test_1329(ShinkenTest):
+
+    def setUp(self):
+        self.setup_with_file('etc/1329.cfg')
+
+    def test_1329(self):
+
+        host = self.sched.hosts.find_by_name("test_host_0")
+        #host.notification_options = [ '']
+        self.scheduler_loop(1, [[host, 0, 'UP']])
+        print(host.state)
+        self.assertEqual('UP', host.state)
+        self.scheduler_loop(2, [[host, 1, 'DOWN']])
+        self.scheduler_loop(2, [[host, 1, 'DOWN']], do_sleep=1, sleep_time=0.5)
+        print(host.state)
+
+
 if __name__ == '__main__':
     unittest.main()
