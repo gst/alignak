@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2012:
@@ -29,6 +28,11 @@ import sys
 import traceback
 import cStringIO
 import imp
+from os import listdir
+from os.path import isdir, join, abspath
+
+import importlib
+
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -73,68 +77,102 @@ class ModulesManager(object):
         self.get_instances()
 
 
+    @classmethod
+    def try_best_load(cls, name, package=None):
+        try:
+            mod = importlib.import_module(name, package)
+        except Exception as err:
+            logger.warning("Cannot import %s : %s" % (
+                           '%s.%s' % (package, name) if package else name,
+                           err))
+            return
+        # if the module have a 'properties' and a 'get_instance'
+        # then we are happy and we'll use that:
+        try:
+            mod.properties
+            mod.get_instance
+        except AttributeError:
+            return
+        return mod
+
+
+    @classmethod
+    def try_very_bad_load(cls, mod_dir):
+        prev_module = sys.modules.get('module')  # cache locally any previously imported 'module' ..
+        logger.warning(
+            "Trying to load %r as an (very-)old-style shinken \"module\" : "
+            "by adding its path to sys.path. This can be (very) bad in case "
+            "of name conflicts within the files part of %s and others "
+            "top-level python modules; I'll try to limit that." % (
+            # by removing the mod_dir from sys.path after while.
+            mod_dir, mod_dir
+        ))
+        sys.path.insert(0, mod_dir)
+        try:
+            return importlib.import_module('module')
+        except Exception as err:
+            logger.error("Could not import bare 'module.py' from %s : %s" % (mod_dir, err))
+            return
+        finally:
+            sys.path.remove(mod_dir)
+            if prev_module is not None:  # and restore it after we have loaded our one (or not)
+                sys.modules['module'] = prev_module
+
+    @classmethod
+    def try_load(cls, mod_name, mod_dir=None):
+        msg = ''
+        mod = cls.try_best_load(mod_name)
+        if mod:
+            msg = "Correctly loaded %s as a very-new-style shinken module :)"
+        else:
+            mod = cls.try_best_load('.module', mod_name)
+            if mod:
+                msg = "Correctly loaded %s as an old-new-style shinken module :|"
+            elif mod_dir:
+                mod = cls.try_very_bad_load(mod_dir)
+                if mod:
+                    msg = "Correctly loaded %s as a very old-style shinken module :s"
+        if msg:
+            logger.info(msg % mod_name)
+        return mod
+
     # Try to import the requested modules ; put the imported modules in self.imported_modules.
     # The previous imported modules, if any, are cleaned before.
     def load(self):
-        now = int(time.time())
-        # We get all modules file with .py
-        modules_files = []#fname[:-3] for fname in os.listdir(self.modules_path)
-                         #if fname.endswith(".py")]
-
-        # And directories
-        modules_files.extend([fname for fname in os.listdir(self.modules_path)
-                               if os.path.isdir(os.path.join(self.modules_path, fname))])
-
-        # Now we try to load them
-        # So first we add their dir into the sys.path
-        if not self.modules_path in sys.path:
+        if self.modules_path not in sys.path:
             sys.path.append(self.modules_path)
 
-        # We try to import them, but we keep only the one of
-        # our type
+        modules_files = [fname
+                         for fname in listdir(self.modules_path)
+                         if isdir(join(self.modules_path, fname))]
+
         del self.imported_modules[:]
-        for fname in modules_files:
+        for mod_name in modules_files:
+            mod_file = abspath(join(self.modules_path, mod_name, 'module.py'))
+            mod_dir = os.path.normpath(os.path.dirname(mod_file))
+            mod = self.try_load(mod_name, mod_dir)
+            if not mod:
+                continue
             try:
-                # Then we load the module.py inside this directory
-                mod_file = os.path.abspath(os.path.join(self.modules_path, fname,'module.py'))
-                mod_dir  =  os.path.dirname(mod_file)
-                # We add this dir to sys.path so the module can load local files too
-                sys.path.append(mod_dir)
-                if not os.path.exists(mod_file):
-                    mod_file = os.path.abspath(os.path.join(self.modules_path, fname,'module.pyc'))
-                m = None
-                if mod_file.endswith('.py'):
-                    # important, equivalent to import fname from module.py
-                    m = imp.load_source(fname, mod_file)
-                else:
-                    m = imp.load_compiled(fname, mod_file)
-                m_dir = os.path.abspath(os.path.dirname(m.__file__))
-                
-                # Look if it's a valid module
-                if not hasattr(m, 'properties'):
-                    logger.warning('Bad module file for %s : missing properties dict' % mod_file)
-                    continue
-                
-                # We want to keep only the modules of our type
-                if self.modules_type in m.properties['daemons']:
-                    self.imported_modules.append(m)
-            except Exception, exp:
-                # Oups, somethign went wrong here...
-                logger.warning("Importing module %s: %s" % (fname, exp))
+                is_our_type = self.modules_type in mod.properties['daemons']
+            except Exception as err:
+                logger.warning("Bad module file for %s : cannot check its properties['daemons']"
+                               "attribute : %s", mod_file, err)
+            else:  # We want to keep only the modules of our type
+                if is_our_type:
+                    self.imported_modules.append(mod)
 
         # Now we want to find in theses modules the ones we are looking for
         del self.modules_assoc[:]
         for mod_conf in self.modules:
             module_type = uniform_module_type(mod_conf.module_type)
-            is_find = False
             for module in self.imported_modules:
                 if uniform_module_type(module.properties['type']) == module_type:
                     self.modules_assoc.append((mod_conf, module))
-                    is_find = True
                     break
-            if not is_find:
-                # No module is suitable, we Raise a Warning
-                logger.warning("The module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
+            else:  # No module is suitable, we emit a Warning
+                logger.warning("The module type %s for %s was not found in modules!",
+                               module_type, mod_conf.get_name())
 
 
     # Try to "init" the given module instance.
