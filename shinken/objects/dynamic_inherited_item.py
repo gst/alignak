@@ -88,7 +88,9 @@ class Item(object):
             # otherwise :
             raise AttributeError('%s unavailable here nor in any of my "parent(s)" (use)' % attr)
         # we don't manage any other "dynamic" attribute (but we could), so :
-        raise AttributeError('No such attribute %r' % attr)
+        if args:
+            return args[0]
+        raise AttributeError('%s has no %r attribute' % (self, attr))
 
     @classmethod
     def make_template(cls, **kw):
