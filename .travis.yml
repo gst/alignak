@@ -2,7 +2,11 @@ language: python
 python:
   - "2.6"
   - "2.7"
-  
+
+env:
+  - NOSE_PROCESSES=-1
+  - NOSE_PROCESSES=1
+
 # command to install dependencies
 # some are only used for travis/coveralls so we are installing them here only
 install:
@@ -13,7 +17,7 @@ install:
 script:
   - cd test
   - pip freeze  # so to help eventual debug: know what exact versions are in use can be rather useful.
-  - nosetests -xv --process-restartworker --processes=1 --process-timeout=300  --with-coverage --cover-package=alignak
+  - nosetests -xv --process-restartworker --process-timeout=300  --with-coverage --cover-package=alignak
   - coverage combine
   - cd .. && pep8 --max-line-length=100 --ignore=E303,E302,E301,E241 --exclude='*.pyc' alignak/*
 # specific call to launch coverage data into coveralls.io
