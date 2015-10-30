@@ -46,6 +46,7 @@
 
 import os
 import time
+import sys
 
 from alignak_test import (
     AlignakTest, time_hacker, unittest
@@ -62,14 +63,15 @@ class TestMissingimportedFrom(AlignakTest):
 
     def setUp(self):
         #logger.setLevel('DEBUG')
+        sys.path.insert(0, modules_dir)
         self.setup_with_file(['etc/alignak_missing_imported_from_module_property.cfg'])
+        sys.path.remove(modules_dir)
 
     # we are loading a module (dummy_arbiter) that is givving objects WITHOUT
     # setting imported_from. One host got a warning, and this can crash without the imported_from setting
     # in the arbiterdaemon part.
     def test_missing_imported_from(self):
         self.assertTrue(self.sched.conf.is_correct)
-    
 
 
 if __name__ == '__main__':
